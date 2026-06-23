@@ -215,7 +215,7 @@ export const validateConfig = (
           );
         }
       } catch (err) {
-        errors.push(err);
+        errors.push(err as MovieMatchError);
       }
     }
 
@@ -227,7 +227,7 @@ export const validateConfig = (
           RequirePlexTvLoginInvalid,
         );
       } catch (err) {
-        errors.push(err);
+        errors.push(err as MovieMatchError);
       }
     }
 
@@ -241,11 +241,11 @@ export const validateConfig = (
           errors.push(new TlsConfigKeyFileInvalid());
         }
       } catch (err) {
-        errors.push(err);
+        errors.push(err as MovieMatchError);
       }
     }
   } catch (err) {
-    errors.push(err);
+    errors.push(err as MovieMatchError);
   }
 
   return errors;
