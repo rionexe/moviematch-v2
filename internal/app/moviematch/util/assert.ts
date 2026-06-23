@@ -6,7 +6,7 @@ export class MovieMatchError extends Error {
 }
 
 export class MovieMatchUnknownError extends Error {
-  name = "MovieMatchUnknownError";
+  override name = "MovieMatchUnknownError";
 }
 
 export function assert(

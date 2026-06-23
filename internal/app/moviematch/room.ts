@@ -17,19 +17,19 @@ import { Client } from "/internal/app/moviematch/client.ts";
 import type { RouteContext } from "./types.ts";
 
 export class RoomExistsError extends Error {
-  name = "RoomExistsError";
+  override name = "RoomExistsError";
 }
 export class AccessDeniedError extends Error {
-  name = "AccessDeniedError";
+  override name = "AccessDeniedError";
 }
 export class RoomNotFoundError extends Error {
-  name = "RoomNotFoundError";
+  override name = "RoomNotFoundError";
 }
 export class UserAlreadyJoinedError extends Error {
-  name = "UserAlreadyJoinedError";
+  override name = "UserAlreadyJoinedError";
 }
 export class NoMediaError extends Error {
-  name = "NoMediaError";
+  override name = "NoMediaError";
 }
 
 export class Room {

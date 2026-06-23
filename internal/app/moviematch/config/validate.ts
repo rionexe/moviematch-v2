@@ -105,7 +105,11 @@ export const validateConfig = (
             try {
               new URL(server.url);
             } catch (err) {
-              errors.push(new ServerUrlInvalid(err.message));
+              errors.push(
+                new ServerUrlInvalid(
+                  err instanceof Error ? err.message : String(err),
+                ),
+              );
             }
 
             addRedaction(server.url);
@@ -181,7 +185,7 @@ export const validateConfig = (
             }
           }
         } catch (err) {
-          errors.push(err);
+          errors.push(err as MovieMatchError);
         }
       }
     }

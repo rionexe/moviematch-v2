@@ -10,7 +10,7 @@ import {
   requestWrite,
 } from "/internal/app/moviematch/util/permission.ts";
 
-let configPath: string;
+let configPath: string | undefined;
 let cachedConfig: Config;
 
 export function getConfig() {
