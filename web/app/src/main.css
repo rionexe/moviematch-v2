@@ -74,7 +74,11 @@ select {
 }
 
 body {
-  background-image: linear-gradient(160deg, var(--mm-bg-from) 0%, var(--mm-bg-to) 100%);
+  background-image: linear-gradient(
+    160deg,
+    var(--mm-bg-from) 0%,
+    var(--mm-bg-to) 100%
+  );
   background-attachment: fixed;
   background-size: cover;
   color: #f0f0f0;

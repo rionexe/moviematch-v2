@@ -14,7 +14,7 @@
   grid-template-columns: 1fr 7rem;
 }
 
-.listItem:nth-of-type(n + 2) {
+.listItem:nth-of-type(n+2) {
   margin-top: var(--s4);
 }
 

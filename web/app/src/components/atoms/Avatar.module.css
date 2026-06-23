@@ -14,7 +14,9 @@
   --circumference: calc(2 * 3.1415 * 15);
   stroke: hsl(var(--hue) 70% 80%);
   stroke-width: 2px;
-  stroke-dasharray: var(--progress), var(--circumference);
+  stroke-dasharray:
+    var(--progress),
+    var(--circumference);
   stroke-linecap: round;
 }
 

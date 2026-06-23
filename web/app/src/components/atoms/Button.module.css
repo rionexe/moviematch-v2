@@ -51,7 +51,8 @@
   border: 2px solid var(--bg-color);
   padding: var(--s1);
   color: var(--mm-black);
-  transition: color var(--mm-transition-duration) ease-in-out,
+  transition:
+    color var(--mm-transition-duration) ease-in-out,
     border-color var(--mm-transition-duration) ease-in-out;
 }
 

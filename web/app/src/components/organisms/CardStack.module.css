@@ -68,14 +68,14 @@
 .dislikeButton {
   composes: control;
   --strokeColor: var(--mm-failure-color);
-  left: calc(50% - ((var(--card-width) + 23rem) / 2));
+  left: calc(50% - (var(--card-width) + 23rem) / 2);
 }
 
 .likeButton {
   composes: control;
   --fillColor: hsl(112, 80%, 30%);
   --strokeColor: transparent;
-  right: calc(50% - ((var(--card-width) + 23rem) / 2));
+  right: calc(50% - (var(--card-width) + 23rem) / 2);
 }
 
 @media screen and (min-width: 50em) {
@@ -83,4 +83,3 @@
     display: initial;
   }
 }
-

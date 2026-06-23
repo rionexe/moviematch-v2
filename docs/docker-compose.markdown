@@ -1,15 +1,15 @@
 # Docker Compose
 
 ```yaml
-version: '3'
+version: "3"
 services:
   moviematch:
-   image: lukechannings/moviematch:latest
-   container_name: moviematch
-   environment:
-    PLEX_URL: "<Plex URL>"
-    PLEX_TOKEN: "<Plex Token>"
-   ports:
+    image: lukechannings/moviematch:latest
+    container_name: moviematch
+    environment:
+      PLEX_URL: "<Plex URL>"
+      PLEX_TOKEN: "<Plex Token>"
+    ports:
       - 8000:8000
 ```
 

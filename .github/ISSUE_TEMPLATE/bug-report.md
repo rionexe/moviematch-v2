@@ -3,8 +3,7 @@ name: Bug Report
 about: Create a report to help us improve
 title: "[Bug]"
 labels: bug
-assignees: ''
-
+assignees: ""
 ---
 
 **⚠️ Before filing a bug please be sure to have read the
