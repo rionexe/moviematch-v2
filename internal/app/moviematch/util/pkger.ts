@@ -1,6 +1,6 @@
 export const isRelease = false;
 
-const useAbsolutePath = <T>(fn: (path: string) => T): ((path: string) => T) => {
+const useAbsolutePath = <T>(fn: (path: string) => T): (path: string) => T => {
   return (path: string) => fn(Deno.cwd() + path);
 };
 

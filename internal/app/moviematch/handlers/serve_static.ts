@@ -4,7 +4,8 @@ import { RouteHandler } from "/internal/app/moviematch/types.ts";
 
 const isGzipped = (bytes: Uint8Array) => bytes[0] === 31 && bytes[1] === 139;
 
-export const serveStatic = (rootPaths: string[]): RouteHandler =>
+export const serveStatic =
+  (rootPaths: string[]): RouteHandler =>
   async (req: ServerRequest): Promise<Response | void> => {
     let response: Response = {
       status: 404,

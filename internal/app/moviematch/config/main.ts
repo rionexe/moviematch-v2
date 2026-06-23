@@ -53,10 +53,10 @@ export async function loadConfig(
     ...(serversLength !== 0
       ? ({
         servers: Array.from({ length: serversLength }).map(
-          ((_, index) => ({
+          (_, index) => ({
             ...(yamlConfig?.servers ?? [])[index],
             ...(envConfig?.servers ?? [])[index],
-          })),
+          }),
         ),
       })
       : {}),

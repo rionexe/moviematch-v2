@@ -24,8 +24,10 @@ browserTest(
     await page.click(btnSelector("create-room"));
 
     await page.screenshot(
-      getScreenshotOptions(`create_room_nofilters_${emulatedName ??
-        "desktop"}`),
+      getScreenshotOptions(`create_room_nofilters_${
+        emulatedName ??
+          "desktop"
+      }`),
     );
   },
 );

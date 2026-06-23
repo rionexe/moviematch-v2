@@ -69,12 +69,14 @@ export class Room {
     const media: Media[] = [];
 
     for (const provider of this.RouteContext.providers) {
-      media.push(...await provider.getMedia({
-        filters: this.filters,
-        minAge: this.minAge,
-        maxAge: this.maxAge,
-        includeUnrated: this.includeUnrated,
-      }));
+      media.push(
+        ...await provider.getMedia({
+          filters: this.filters,
+          minAge: this.minAge,
+          maxAge: this.maxAge,
+          includeUnrated: this.includeUnrated,
+        }),
+      );
     }
 
     if (media.length === 0) {
@@ -86,7 +88,7 @@ export class Room {
     media.sort(() => 0.5 - Math.random());
 
     return new Map<string, Media>(
-      media.map((media) => ([media.id, media])),
+      media.map((media) => [media.id, media]),
     );
   });
 

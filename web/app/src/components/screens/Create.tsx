@@ -89,7 +89,9 @@ export const CreateScreen = () => {
                 className={styles.ageSelect}
                 value={minAge ?? ""}
                 onChange={(e) =>
-                  setMinAge(e.target.value ? Number(e.target.value) : undefined)}
+                  setMinAge(
+                    e.target.value ? Number(e.target.value) : undefined,
+                  )}
               >
                 <option value="">Any</option>
                 {AGE_OPTIONS.map((o) => (
@@ -104,7 +106,9 @@ export const CreateScreen = () => {
                 className={styles.ageSelect}
                 value={maxAge ?? ""}
                 onChange={(e) =>
-                  setMaxAge(e.target.value ? Number(e.target.value) : undefined)}
+                  setMaxAge(
+                    e.target.value ? Number(e.target.value) : undefined,
+                  )}
               >
                 <option value="">Any</option>
                 {[...AGE_OPTIONS].reverse().map((o) => (

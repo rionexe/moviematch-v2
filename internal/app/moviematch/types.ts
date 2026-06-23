@@ -13,4 +13,4 @@ export interface RouteContext {
 export type RouteHandler = (
   req: ServerRequest,
   ctx: RouteContext,
-) => (Promise<Response | void> | Response | void);
+) => Promise<Response | void> | Response | void;

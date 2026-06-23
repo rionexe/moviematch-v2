@@ -11,10 +11,9 @@ interface PillProps {
 export const Pill = ({ children, onRemove, href }: PillProps) => {
   const Tag = href ? "a" : "div";
 
-  const props =
-    (Tag === "a"
-      ? { href, target: "_blank" }
-      : { onClick: onRemove } as HTMLAttributes<HTMLElement>);
+  const props = Tag === "a"
+    ? { href, target: "_blank" }
+    : { onClick: onRemove } as HTMLAttributes<HTMLElement>;
 
   return (
     <Tag

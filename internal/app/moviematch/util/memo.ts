@@ -1,7 +1,7 @@
 import { isRelease } from "pkger";
 
 // deno-lint-ignore no-explicit-any
-export const memo = <T>(fn: (...args: any[]) => T): ((...args: any[]) => T) => {
+export const memo = <T>(fn: (...args: any[]) => T): (...args: any[]) => T => {
   if (!isRelease) {
     return fn;
   }
@@ -19,7 +19,7 @@ export const memo1 = <T>(
   // deno-lint-ignore no-explicit-any
   fn: (key: string, ...args: any[]) => T,
   // deno-lint-ignore no-explicit-any
-): ((key: string, ...args: any[]) => T) => {
+): (key: string, ...args: any[]) => T => {
   if (!isRelease) {
     return fn;
   }

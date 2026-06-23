@@ -41,51 +41,50 @@ export const createStore = () => {
     client = new MovieMatchClient();
   }
 
-  const forwardActions: Middleware<Dispatch, Store> = ({ getState }) =>
-    (next) =>
-      (action: Actions) => {
-        if (action.type in client) {
-          client[action.type as ServerMessage["type"]](
-            "payload" in action ? action.payload as any : undefined,
-          );
-        }
+  const forwardActions: Middleware<Dispatch, Store> =
+    ({ getState }) => (next) => (action: Actions) => {
+      if (action.type in client) {
+        client[action.type as ServerMessage["type"]](
+          "payload" in action ? action.payload as any : undefined,
+        );
+      }
 
-        if (action.type === "plexLogin") {
-          plex.signIn();
-        }
+      if (action.type === "plexLogin") {
+        plex.signIn();
+      }
 
-        if (action.type === "loginSuccess") {
-          localStorage.setItem("userName", action.payload.userName!);
-        }
+      if (action.type === "loginSuccess") {
+        localStorage.setItem("userName", action.payload.userName!);
+      }
 
-        if (action.type === "logout") {
-          localStorage.removeItem("userName");
-          localStorage.removeItem("plexToken");
-          localStorage.removeItem("plexTvPin");
-        }
+      if (action.type === "logout") {
+        localStorage.removeItem("userName");
+        localStorage.removeItem("plexToken");
+        localStorage.removeItem("plexTvPin");
+      }
 
-        if (
-          action.type === "joinRoomSuccess" ||
-          action.type === "createRoomSuccess"
-        ) {
-          const roomName = getState().room?.name;
-          if (roomName) {
-            const newUrl = new URL(location.href);
-            newUrl.searchParams.set("roomName", roomName);
-            history.replaceState(null, document.title, newUrl.href);
-          }
-        }
-
-        if (
-          action.type === "leaveRoomSuccess" || action.type === "logoutSuccess"
-        ) {
+      if (
+        action.type === "joinRoomSuccess" ||
+        action.type === "createRoomSuccess"
+      ) {
+        const roomName = getState().room?.name;
+        if (roomName) {
           const newUrl = new URL(location.href);
-          newUrl.searchParams.delete("roomName");
+          newUrl.searchParams.set("roomName", roomName);
           history.replaceState(null, document.title, newUrl.href);
         }
+      }
 
-        return next(action);
-      };
+      if (
+        action.type === "leaveRoomSuccess" || action.type === "logoutSuccess"
+      ) {
+        const newUrl = new URL(location.href);
+        newUrl.searchParams.delete("roomName");
+        history.replaceState(null, document.title, newUrl.href);
+      }
+
+      return next(action);
+    };
 
   const store = createReduxStore(
     reducer,

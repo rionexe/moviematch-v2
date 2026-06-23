@@ -26,9 +26,11 @@ export const JoinScreen = () => {
   }, [initialRoomName]);
 
   if (initialRoomName && !store.error) {
-    return <Layout>
-      <Spinner />
-    </Layout>;
+    return (
+      <Layout>
+        <Spinner />
+      </Layout>
+    );
   }
 
   return (
@@ -40,9 +42,11 @@ export const JoinScreen = () => {
         }}
       >
         {store.error &&
-          <ErrorMessage
-            message={store.error.message ?? store.error.type ?? ""}
-          />}
+          (
+            <ErrorMessage
+              message={store.error.message ?? store.error.type ?? ""}
+            />
+          )}
         <Field
           label="Room Name"
           name="roomName"
