@@ -115,7 +115,7 @@ export const CardStack = memo(
           }
           case "remove": {
             const item = items.find((_) => _.id === action.payload.id);
-            if (item) {
+            if (item && !item.removed) {
               const itemIndex = items.indexOf(item);
 
               if (item.controller.springs.x.idle) {

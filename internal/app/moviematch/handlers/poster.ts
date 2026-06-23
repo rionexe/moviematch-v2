@@ -38,5 +38,10 @@ export const handler: RouteHandler = async (
     };
   } catch (err) {
     log.error(err.message);
+    return {
+      status: 404,
+      headers: new Headers({ "content-type": "text/plain" }),
+      body: "Poster not found",
+    };
   }
 };

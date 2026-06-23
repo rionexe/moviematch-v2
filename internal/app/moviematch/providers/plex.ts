@@ -184,37 +184,39 @@ export const createProvider = (
 
       const libraries: Library[] = await getLibraries();
 
+      const results = await Promise.all(
+        libraries.map((library) =>
+          api.getLibraryItems(library.key, { filters: filterParams })
+        ),
+      );
+
+      const seen = new Set<string>();
       const media: Media[] = [];
 
-      for (const library of libraries) {
-        const libraryItems = await api.getLibraryItems(
-          library.key,
-          { filters: filterParams },
-        );
-        if (libraryItems.size) {
-          for (const libraryItem of libraryItems.Metadata) {
-            let posterUrl;
-            if (libraryItem.thumb) {
-              const [, , , metadataId, , thumbId] = libraryItem.thumb.split(
-                "/",
-              );
-              posterUrl = `/api/poster/${id}/${metadataId}/${thumbId}`;
-            }
-            media.push({
-              id: libraryItem.guid,
-              type: libraryItem.type as LibraryType,
-              title: libraryItem.title,
-              description: libraryItem.summary,
-              tagline: libraryItem.tagline,
-              year: libraryItem.year,
-              posterUrl,
-              linkUrl: `/api/link/${id}/${libraryItem.key}`,
-              genres: libraryItem.Genre?.map((_) => _.tag) ?? [],
-              duration: Number(libraryItem.duration),
-              rating: Number(libraryItem.rating),
-              contentRating: libraryItem.contentRating,
-            });
+      for (const libraryItems of results) {
+        for (const libraryItem of libraryItems.Metadata ?? []) {
+          if (seen.has(libraryItem.guid)) continue;
+          seen.add(libraryItem.guid);
+
+          let posterUrl;
+          if (libraryItem.thumb) {
+            const [, , , metadataId, , thumbId] = libraryItem.thumb.split("/");
+            posterUrl = `/api/poster/${id}/${metadataId}/${thumbId}`;
           }
+          media.push({
+            id: libraryItem.guid,
+            type: libraryItem.type as LibraryType,
+            title: libraryItem.title,
+            description: libraryItem.summary,
+            tagline: libraryItem.tagline,
+            year: libraryItem.year,
+            posterUrl,
+            linkUrl: `/api/link/${id}/${libraryItem.key}`,
+            genres: libraryItem.Genre?.map((_) => _.tag) ?? [],
+            duration: Number(libraryItem.duration),
+            rating: Number(libraryItem.rating),
+            contentRating: libraryItem.contentRating,
+          });
         }
       }
 
