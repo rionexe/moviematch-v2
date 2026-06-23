@@ -8,7 +8,7 @@ const clientId = "odFpLIdHbUMBOL4iwYRGsPc2mJkoOY";
 
 try {
   assert(
-    typeof TEST_PLEX_TOKEN !== "undefined",
+    !!TEST_PLEX_TOKEN,
     "TEST_PLEX_TOKEN is required for testing Plex TV API integration",
   );
 

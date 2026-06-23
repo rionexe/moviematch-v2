@@ -8,11 +8,11 @@ const TEST_PLEX_TOKEN = Deno.env.get("TEST_PLEX_TOKEN");
 
 try {
   assert(
-    typeof TEST_PLEX_URL !== "undefined",
+    !!TEST_PLEX_URL,
     "TEST_PLEX_URL is required for testing Plex API integration",
   );
   assert(
-    typeof TEST_PLEX_TOKEN !== "undefined",
+    !!TEST_PLEX_TOKEN,
     "TEST_PLEX_TOKEN is required for testing Plex API integration",
   );
 
