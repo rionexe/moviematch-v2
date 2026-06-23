@@ -40,6 +40,9 @@ export class Room {
   filters?: Filter[];
   options?: RoomOption[];
   sort: RoomSort;
+  minAge?: number;
+  maxAge?: number;
+  includeUnrated: boolean;
 
   media: Promise<Map</*mediaId */ string, Media>>;
   userProgress = new Map</* userName */ string, number>();
@@ -55,6 +58,9 @@ export class Room {
     this.options = req.options;
     this.filters = req.filters;
     this.sort = req.sort ?? "random";
+    this.minAge = req.minAge;
+    this.maxAge = req.maxAge;
+    this.includeUnrated = req.includeUnrated ?? false;
 
     this.media = this.getMedia();
   }
@@ -63,7 +69,12 @@ export class Room {
     const media: Media[] = [];
 
     for (const provider of this.RouteContext.providers) {
-      media.push(...await provider.getMedia({ filters: this.filters }));
+      media.push(...await provider.getMedia({
+        filters: this.filters,
+        minAge: this.minAge,
+        maxAge: this.maxAge,
+        includeUnrated: this.includeUnrated,
+      }));
     }
 
     if (media.length === 0) {

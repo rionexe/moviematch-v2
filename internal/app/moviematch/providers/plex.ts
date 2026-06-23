@@ -11,6 +11,7 @@ import {
 } from "/internal/app/moviematch/providers/types.ts";
 import { FieldType } from "/internal/app/plex/types/library_items.ts";
 import { filterToQueryString } from "/internal/app/plex/util.ts";
+import { mapRatingToAge } from "/internal/app/plex/rating_age.ts";
 
 export interface PlexProviderConfig {
   url: string;
@@ -177,7 +178,7 @@ export const createProvider = (
 
       return api.getDeepLink(key, { type: linkType });
     },
-    getMedia: async ({ filters }) => {
+    getMedia: async ({ filters, minAge, maxAge, includeUnrated = false }) => {
       const filterParams: Record<string, string> = filtersToPlexQueryString(
         filters,
       );
@@ -203,6 +204,17 @@ export const createProvider = (
             const [, , , metadataId, , thumbId] = libraryItem.thumb.split("/");
             posterUrl = `/api/poster/${id}/${metadataId}/${thumbId}`;
           }
+          if (minAge !== undefined || maxAge !== undefined) {
+            const age = mapRatingToAge(libraryItem.contentRating);
+            if (age === null) {
+              if (!includeUnrated) continue;
+            } else {
+              if (minAge !== undefined && age < minAge) continue;
+              if (maxAge !== undefined && age > maxAge) continue;
+            }
+          }
+
+          const mediaKey = libraryItem.key.replace(/\/children\/?$/, "");
           media.push({
             id: libraryItem.guid,
             type: libraryItem.type as LibraryType,
@@ -211,7 +223,7 @@ export const createProvider = (
             tagline: libraryItem.tagline,
             year: libraryItem.year,
             posterUrl,
-            linkUrl: `/api/link/${id}/${libraryItem.key}`,
+            linkUrl: `/api/link/${id}/${mediaKey}`,
             genres: libraryItem.Genre?.map((_) => _.tag) ?? [],
             duration: Number(libraryItem.duration),
             rating: Number(libraryItem.rating),

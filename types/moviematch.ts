@@ -152,6 +152,9 @@ export interface CreateRoomRequest {
   options?: RoomOption[];
   filters?: Filter[];
   sort?: RoomSort;
+  minAge?: number;
+  maxAge?: number;
+  includeUnrated?: boolean;
 }
 
 export interface CreateRoomError {

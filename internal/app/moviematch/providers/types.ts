@@ -52,5 +52,8 @@ export interface MovieMatchProvider {
 
   getMedia(options: {
     filters?: Filter[];
+    minAge?: number;
+    maxAge?: number;
+    includeUnrated?: boolean;
   }): Promise<Media[]>;
 }
