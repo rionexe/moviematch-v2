@@ -1,8 +1,7 @@
 import { serve } from 'https://deno.land/std@0.79.0/http/server.ts'
 import * as log from 'https://deno.land/std@0.79.0/log/mod.ts'
-import { getServerId, proxyPoster } from './api/plex.ts'
+import { getServerId, proxyPoster, getAllowedLibraries } from './api/plex.ts'
 import { PLEX_URL, PORT, LINK_TYPE } from './config.ts'
-import { getLinkTypeForRequest } from './i18n.ts'
 import { handleLogin } from './session.ts'
 import { serveFile } from './util/staticFileServer.ts'
 import { WebSocketServer } from './util/websocketServer.ts'
@@ -30,23 +29,22 @@ for await (const req of server) {
       wss.connect(req)
     } else if (req.url.startsWith('/movie/')) {
       const serverId = await getServerId()
-      const key = req.url.replace('/movie', '')
+      const [rawKey] = req.url.replace('/movie', '').split('?')
+      // A show's key arrives as .../children (its season listing); the details
+      // deep-link resolves from the base metadata key, so drop that suffix.
+      const key = rawKey.replace(/\/children\/?$/, '')
 
-      let location: string
-
-      if (getLinkTypeForRequest(req.headers) === 'app') {
-        location = `plex://preplay/?metadataKey=${encodeURIComponent(
-          key
-        )}&metadataType=1&server=${serverId}`
-      } else if (LINK_TYPE == 'plex.tv') {
-        location = `https://app.plex.tv/desktop#!/server/${serverId}/details?key=${encodeURIComponent(
-          key
-        )}`
-      } else {
-        location = `${PLEX_URL}/web/index.html#!/server/${serverId}/details?key=${encodeURIComponent(
-          key
-        )}`
-      }
+      // This route is the *web* fallback (and the no-JavaScript target). The
+      // client attempts the native plex:// app first and only follows this when
+      // the app doesn't take over. LINK_TYPE=local forces the on-network URL.
+      const location =
+        LINK_TYPE === 'local'
+          ? `${PLEX_URL}/web/index.html#!/server/${serverId}/details?key=${encodeURIComponent(
+              key
+            )}`
+          : `https://app.plex.tv/desktop/#!/server/${serverId}/details?key=${encodeURIComponent(
+              key
+            )}`
 
       await req.respond({
         status: 302,
@@ -62,6 +60,41 @@ for await (const req of server) {
         await req.respond({ status: 404 })
       } else {
         await proxyPoster(req, key)
+      }
+    } else if (req.url.replace(/\?.*$/, '').endsWith('/api/libraries')) {
+      // Allow-listed libraries for the Create Room picker to populate
+      try {
+        const libraries = await getAllowedLibraries()
+        await req.respond({
+          status: 200,
+          headers: new Headers({ 'content-type': 'application/json' }),
+          body: JSON.stringify({ libraries }),
+        })
+      } catch (err) {
+        log.error(`Failed to load libraries: ${err.message}`)
+        await req.respond({
+          status: 500,
+          headers: new Headers({ 'content-type': 'application/json' }),
+          body: JSON.stringify({ libraries: [] }),
+        })
+      }
+    } else if (req.url.replace(/\?.*$/, '').endsWith('/api/server')) {
+      // The Plex machine identifier, so the client can build native plex://
+      // deep links (it's already exposed in the /movie redirect, not a secret).
+      try {
+        const serverId = await getServerId()
+        await req.respond({
+          status: 200,
+          headers: new Headers({ 'content-type': 'application/json' }),
+          body: JSON.stringify({ serverId }),
+        })
+      } catch (err) {
+        log.error(`Failed to load server id: ${err.message}`)
+        await req.respond({
+          status: 500,
+          headers: new Headers({ 'content-type': 'application/json' }),
+          body: JSON.stringify({ serverId: null }),
+        })
       }
     } else {
       serveFile(req, '/public')

@@ -4,3 +4,15 @@ node_modules
 .env
 .DS_Store
 *.sketch
+*.tar
+*.tar.gz
+
+# Not used by the Deno runtime — kept out of the image
+screenshots
+docs
+.github
+package-lock.json
+README.markdown
+.editorconfig
+.env-template
+.gitignore

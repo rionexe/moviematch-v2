@@ -1,5 +1,18 @@
 // deno-lint-ignore-file
 
+const loginErrorMessage = (reason, user) => {
+  switch (reason) {
+    case 'not-found':
+      return `Room not found — create it instead.`
+    case 'exists':
+      return `That room code is already in use. Try another, or join it.`
+    case 'name-taken':
+      return `"${user}" is already in this room. Pick another name.`
+    default:
+      return `Couldn't connect to the room. Please try again.`
+  }
+}
+
 export class MovieMatchAPI extends EventTarget {
   constructor() {
     super()
@@ -14,19 +27,28 @@ export class MovieMatchAPI extends EventTarget {
     this.socket.addEventListener('message', e => this.handleMessage(e))
 
     this._movieList = []
+    this.occupancy = []
 
     window.addEventListener('beforeunload', () => {
       this.socket.close()
     })
   }
 
-  async login(user, roomCode) {
+  async login(user, roomCode, { mode = 'join', filters } = {}) {
+    if (this.socket.readyState !== WebSocket.OPEN) {
+      await new Promise(resolve =>
+        this.socket.addEventListener('open', resolve, { once: true })
+      )
+    }
+
     this.socket.send(
       JSON.stringify({
         type: 'login',
         payload: {
           name: user,
           roomCode,
+          mode,
+          filters,
         },
       })
     )
@@ -38,7 +60,7 @@ export class MovieMatchAPI extends EventTarget {
           if (e.data.success) {
             resolve(e.data)
           } else {
-            reject(new Error(`${user} is already logged in.`))
+            reject(new Error(loginErrorMessage(e.data.reason, user)))
           }
         },
         { once: true }
@@ -58,6 +80,13 @@ export class MovieMatchAPI extends EventTarget {
       case 'match': {
         return this.dispatchEvent(
           new MessageEvent('match', { data: data.payload })
+        )
+      }
+      case 'occupancy': {
+        // Remember the latest so a listener added after login can read it
+        this.occupancy = data.payload.names
+        return this.dispatchEvent(
+          new MessageEvent('occupancy', { data: data.payload })
         )
       }
       case 'loginResponse': {

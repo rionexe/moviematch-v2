@@ -1,0 +1,24 @@
+MovieMatch
+
+Copyright 2020 Luke Channings
+Copyright 2026 rionexe
+
+This product includes software originally developed by Luke Channings as
+"MovieMatch" (https://github.com/LukeChannings/moviematch), licensed under the
+Apache License, Version 2.0.
+
+This distribution is a modified fork of that work. In accordance with section
+4(b) of the License, notable changes from the original include:
+
+  - Multi-user rooms: create or join a room with a short code; matched posters
+    flip to reveal who voted; live occupancy with a name list; tap-to-copy code.
+  - TV-show support (each series appears as a single swipeable card).
+  - Per-room content filtering: allowed-library selection, minimum and maximum
+    content-age dropdowns, and an include-unrated toggle.
+  - "Open in Plex" action on matches, using the universal app.plex.tv deep link
+    so it resolves to the correct movie or show on desktop and mobile.
+  - Frosted-glass UI redesign, a custom colour palette, and the dumbbell-shaped
+    room bar.
+
+Licensed under the Apache License, Version 2.0. See the LICENSE file for the
+full license text.

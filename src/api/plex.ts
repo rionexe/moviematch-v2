@@ -2,7 +2,6 @@ import { ServerRequest } from 'https://deno.land/std@0.79.0/http/server.ts'
 import { assert } from 'https://deno.land/std@0.79.0/_util/assert.ts'
 import * as log from 'https://deno.land/std@0.79.0/log/mod.ts'
 import {
-  DEFAULT_SECTION_TYPE_FILTER,
   LIBRARY_FILTER,
   COLLECTION_FILTER,
   PLEX_TOKEN,
@@ -25,159 +24,167 @@ assert(
 // thrown when the plex token is invalid
 class PlexTokenError extends Error {}
 
-export const getSections = async (): Promise<
-  PlexMediaContainer<PlexDirectory>
-> => {
-  log.debug(`getSections: ${PLEX_URL}/library/sections`)
+// The library structure is stable for the life of the process, so cache it.
+// getAllowedLibraries() and every loadLibraryMovies() call need it, and a room
+// build would otherwise re-fetch it from Plex several times. A rejected fetch
+// clears the cache so a transient error can be retried on the next call.
+let sectionsCache: Promise<PlexMediaContainer<PlexDirectory>> | undefined
 
-  const req = await fetch(
-    `${PLEX_URL}/library/sections?X-Plex-Token=${PLEX_TOKEN}`,
-    {
-      headers: { accept: 'application/json' },
-    }
-  )
+export const getSections = (): Promise<PlexMediaContainer<PlexDirectory>> => {
+  if (sectionsCache) return sectionsCache
 
-  if (req.ok) {
-    return await req.json()
-  } else if (req.status === 401) {
-    throw new PlexTokenError(`Authentication error: ${req.url}`)
-  } else {
-    throw new Error(await req.text())
-  }
-}
-
-const getSelectedLibraryTitles = (
-  sections: PlexMediaContainer<PlexDirectory>
-) => {
-  const availableLibraryNames = sections.MediaContainer.Directory.map(
-    _ => _.title
-  )
-  log.debug(`Available libraries: ${availableLibraryNames.join(', ')}`)
-
-  const defaultLibraryName = sections.MediaContainer.Directory.find(
-    ({ hidden, type }) => hidden !== 1 && type === DEFAULT_SECTION_TYPE_FILTER
-  )?.title
-
-  const libraryTitles =
-    (LIBRARY_FILTER === '' ? defaultLibraryName : LIBRARY_FILTER)
-      ?.split(',')
-      .filter(title => availableLibraryNames.includes(title)) ?? []
-
-  assert(
-    libraryTitles.length !== 0,
-    `${LIBRARY_FILTER} did not match any available library names: ${availableLibraryNames.join(
-      ', '
-    )}`
-  )
-
-  return libraryTitles
-}
-
-export const allMovies = (async () => {
-  const sections = await getSections()
-
-  const selectedLibraryTitles = getSelectedLibraryTitles(sections)
-
-  log.debug(`selected library titles - ${selectedLibraryTitles.join(', ')}`)
-
-  const movieSections = sections.MediaContainer.Directory.filter(
-    ({ title, hidden }) => hidden !== 1 && selectedLibraryTitles.includes(title)
-  )
-
-  assert(movieSections.length !== 0, `Couldn't find a movies section in Plex!`)
-
-  const movies: PlexVideo['Metadata'] = []
-
-  for (const movieSection of movieSections) {
-    log.debug(`Loading movies from ${movieSection.title} library`)
+  const promise = (async () => {
+    log.debug(`getSections: ${PLEX_URL}/library/sections`)
 
     const req = await fetch(
-      `${PLEX_URL}/library/sections/${movieSection.key}/all?X-Plex-Token=${PLEX_TOKEN}`,
-      {
-        headers: { accept: 'application/json' },
-      }
+      `${PLEX_URL}/library/sections?X-Plex-Token=${PLEX_TOKEN}`,
+      { headers: { accept: 'application/json' } }
     )
 
-    log.debug(`Loaded ${req.url}: ${req.status} ${req.statusText}`)
+    if (req.ok) {
+      return await req.json()
+    } else if (req.status === 401) {
+      throw new PlexTokenError(`Authentication error: ${req.url}`)
+    } else {
+      throw new Error(await req.text())
+    }
+  })()
 
-    assert(req.ok, `Error loading ${movieSection.title} library`)
+  // Drop the cache on failure so a transient error can be retried, but only if
+  // a newer call hasn't already replaced it.
+  promise.catch(() => {
+    if (sectionsCache === promise) sectionsCache = undefined
+  })
+
+  sectionsCache = promise
+  return promise
+}
+
+// LIBRARY_FILTER is a fail-safe allow-list:
+//   ''      -> no libraries are exposed (returns no media)
+//   'all'   -> every non-hidden movie- or show-type library
+//   'A,B,C' -> only those titles (that actually exist)
+export const getAllowedLibraries = async (): Promise<string[]> => {
+  const sections = await getSections()
+
+  // Movie and TV-show libraries are both swipeable (a show is one card).
+  const libraryNames = sections.MediaContainer.Directory.filter(
+    ({ hidden, type }) =>
+      hidden !== 1 && (type === 'movie' || type === 'show')
+  ).map(_ => _.title)
+
+  const filter = LIBRARY_FILTER.trim()
+
+  if (filter === '') {
+    log.warning(
+      'LIBRARY_FILTER is empty — no libraries are exposed. Set it to "all" or a comma-separated list of library names.'
+    )
+    return []
+  }
+
+  if (filter.toLowerCase() === 'all') {
+    return libraryNames
+  }
+
+  return filter
+    .split(',')
+    .map(_ => _.trim())
+    .filter(title => libraryNames.includes(title))
+}
+
+// Loads (and caches) the movies for a single allowed library by title.
+const libraryCache = new Map<string, Promise<PlexVideo['Metadata']>>()
+
+export const loadLibraryMovies = (
+  title: string
+): Promise<PlexVideo['Metadata']> => {
+  const cached = libraryCache.get(title)
+  if (cached) return cached
+
+  const promise = (async () => {
+    const sections = await getSections()
+    const allowed = await getAllowedLibraries()
+
+    assert(allowed.includes(title), `${title} is not an allowed library`)
+
+    const section = sections.MediaContainer.Directory.find(
+      ({ title: sectionTitle, hidden }) =>
+        hidden !== 1 && sectionTitle === title
+    )
+
+    assert(section, `Couldn't find the ${title} library in Plex`)
+
+    const req = await fetch(
+      `${PLEX_URL}/library/sections/${section!.key}/all?X-Plex-Token=${PLEX_TOKEN}`,
+      { headers: { accept: 'application/json' } }
+    )
 
     if (!req.ok) {
       if (req.status === 401) {
         throw new PlexTokenError(`Authentication error: ${req.url}`)
-      } else {
-        throw new Error(
-          `${req.url} returned ${req.status}: ${await req.text()}`
-        )
       }
+      throw new Error(`${req.url} returned ${req.status}: ${await req.text()}`)
     }
 
     const libraryData: PlexMediaContainer<PlexVideo> = await req.json()
-    let metadata = libraryData.MediaContainer.Metadata
+    let metadata = libraryData.MediaContainer.Metadata ?? []
 
     if (COLLECTION_FILTER !== '') {
       const collectionFilter = COLLECTION_FILTER.split(',')
-      metadata = metadata.filter(metadataItem => {
-        return metadataItem.Collection?.find(collection =>
+      metadata = metadata.filter(item =>
+        item.Collection?.find(collection =>
           collectionFilter.find(
             filter => filter.toLowerCase() === collection.tag.toLowerCase()
           )
         )
-      })
-    }
-
-    if (!metadata) {
-      log.info(
-        `${libraryData.MediaContainer.librarySectionTitle} does not have any items. Skipping.`
       )
-      log.debug(JSON.stringify(libraryData, null, 2))
-      continue
     }
 
-    assert(
-      metadata?.length,
-      `${movieSection.title} doesn't appear to have any movies`
-    )
+    log.debug(`Loaded ${metadata.length} movies from the ${title} library`)
+    return metadata
+  })()
 
-    log.debug(`Loaded ${metadata?.length} items from ${movieSection.title}`)
+  libraryCache.set(title, promise)
+  return promise
+}
 
-    movies.push(...metadata)
-  }
+// --- Content rating -> age mapping ------------------------------------------
+// The contentRating field holds Common Sense ages plus MPAA/TV stragglers.
+// Map them all onto one age scale so a single "maximum age" can filter.
+const RATING_AGE: Record<string, number> = {
+  G: 6,
+  PG: 10,
+  'PG-13': 13,
+  R: 17,
+  'NC-17': 18,
+  'TV-Y': 2,
+  'TV-Y7': 7,
+  'TV-G': 6,
+  'TV-PG': 10,
+  'TV-14': 14,
+  'TV-MA': 17,
+}
 
-  return movies
-})()
+const UNRATED = new Set(['', 'NONE', 'NOT RATED', 'NR', 'UNRATED', 'UR'])
 
-export class NoMoreMoviesError extends Error {}
+// Returns the age a contentRating maps to, or null when it's unrated/unknown.
+export const mapRatingToAge = (contentRating?: string): number | null => {
+  if (!contentRating) return null
 
-export const getRandomMovie = (() => {
-  const drawnGuids: Set<string> = new Set()
+  let value = contentRating.trim()
+  // strip a country prefix ("us/PG-13") and a leading "Rated "
+  if (value.includes('/')) value = value.split('/').pop()!.trim()
+  value = value.replace(/^rated\s+/i, '').trim()
 
-  const getRandom = (
-    movies: PlexVideo['Metadata']
-  ): PlexVideo['Metadata'][number] => {
-    assert(movies.length !== 0, 'allMovies was empty')
-    if (drawnGuids.size === movies.length) {
-      throw new NoMoreMoviesError()
-    }
+  if (UNRATED.has(value.toUpperCase())) return null
 
-    const randomIndex = Math.floor(Math.random() * movies.length)
-    const movie = movies[randomIndex]
+  // Common Sense numeric age, e.g. "10" or "13+"
+  const numeric = value.match(/^(\d{1,2})\s*\+?$/)
+  if (numeric) return Number(numeric[1])
 
-    assert(
-      !!movie,
-      `Failed to pick a movie. There are ${movies.length} movies and the random index is ${randomIndex}`
-    )
-
-    if (drawnGuids.has(movie.guid)) {
-      return getRandom(movies)
-    } else {
-      drawnGuids.add(movie.guid)
-      return movie
-    }
-  }
-
-  return async () => getRandom(await allMovies)
-})()
+  const age = RATING_AGE[value.toUpperCase()]
+  return age !== undefined ? age : null
+}
 
 export const getServerId = (() => {
   let serverId: string

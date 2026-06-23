@@ -109,17 +109,47 @@
           src="${ROOT_PATH}/assets/logo.svg"
           alt="MovieMatch Logo"
         />
-        <form class="login-form js-login-form" name="login">
+        <div class="mode-toggle js-mode-toggle">
+          <button type="button" class="mode-option is-active" data-mode="join">
+            Join Room
+          </button>
+          <button type="button" class="mode-option" data-mode="create">
+            Create Room
+          </button>
+        </div>
+        <form class="login-form js-login-form" name="login" data-mode="join">
           <label for="name">${LOGIN_NAME}</label>
-          <input type="text" name="name" autocomplete="given-name" required />
-          <label for="room-code">${LOGIN_ROOM_CODE}</label>
-          <div class="room-code-container">
-            <input type="text" name="roomCode" required pattern="[0-9A-Z]{4}" />
-            <button type="button" class="generate-button js-generate-room-code">
-              <abbr title="Generate a new room code">Generate</abbr>
-            </button>
+          <input type="text" name="name" autocomplete="given-name" />
+          <div class="join-only js-join-only">
+            <label for="room-code">${LOGIN_ROOM_CODE}</label>
+            <input type="text" name="roomCode" pattern="[0-9A-Za-z]{4}" autocomplete="off" />
           </div>
-          <button type="submit" class="submit-button">${LOGIN_SUBMIT}</button>
+          <div class="create-only js-create-only">
+            <label>Libraries</label>
+            <div class="library-list js-library-list">
+              <p class="field-hint js-library-loading">Loading libraries…</p>
+            </div>
+            <div class="age-range">
+              <div class="age-field">
+                <label for="min-age">Minimum age</label>
+                <select id="min-age" name="minAge" class="select-input js-min-age">
+                  <option value="">No limit</option>
+                </select>
+              </div>
+              <div class="age-field">
+                <label for="max-age">Maximum age</label>
+                <select id="max-age" name="maxAge" class="select-input js-max-age">
+                  <option value="">No limit</option>
+                </select>
+              </div>
+            </div>
+            <label class="checkbox-row">
+              <input type="checkbox" name="includeUnrated" class="js-include-unrated" />
+              <span>Include unrated movies</span>
+            </label>
+          </div>
+          <p class="login-error js-login-error" hidden></p>
+          <button type="submit" class="submit-button js-submit">Join</button>
         </form>
       </section>
       <section class="rate-section" hidden>
@@ -134,7 +164,18 @@
         hidden
         data-target-type="${CONFIG_MATCHES_TARGET_TYPE}"
       >
-        <hr class="js-room-code-line" />
+        <div class="room-bar js-room-bar">
+          <svg class="room-bar-svg" preserveAspectRatio="none" aria-hidden="true">
+            <path class="js-room-bar-path" d="" />
+          </svg>
+          <button type="button" class="room-bulb-label room-bulb-label--left js-room-code" title="Copy room code">
+            <span class="room-bulb-text">Room ID:&nbsp;<span class="js-room-code-text"></span></span>
+          </button>
+          <button type="button" class="room-bulb-label room-bulb-label--right js-occupancy-toggle" title="Who's in the room">
+            <span class="room-bulb-text">Occupancy&nbsp;-&nbsp;<span class="js-occupancy-count">1</span></span>
+          </button>
+        </div>
+        <ul class="occupancy-list js-occupancy-list" hidden></ul>
         <p class="matches-title">
           <span class="matches-count js-matches-count" data-count="0"></span>
           ${MATCHES_SECTION_TITLE}

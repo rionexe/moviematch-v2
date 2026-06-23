@@ -18,8 +18,6 @@ export const PORT = getEnvTrimmed('PORT') ?? '8000'
 export const LOG_LEVEL = getEnvTrimmed('LOG_LEVEL') ?? 'INFO'
 export const MOVIE_BATCH_SIZE = getEnvTrimmed('MOVIE_BATCH_SIZE') ?? '25'
 export const LINK_TYPE = getEnvTrimmed('LINK_TYPE') ?? 'app'
-export const DEFAULT_SECTION_TYPE_FILTER =
-  getEnvTrimmed('DEFAULT_SECTION_TYPE_FILTER') ?? 'movie'
 export const LIBRARY_FILTER = getEnvTrimmed('LIBRARY_FILTER') ?? ''
 export const COLLECTION_FILTER = getEnvTrimmed('COLLECTION_FILTER') ?? ''
 export const ROOT_PATH = getEnvTrimmed('ROOT_PATH') ?? ''

@@ -1,3 +1,6 @@
 .env
 node_modules
 .DS_Store
+
+# Built Docker images saved with `docker save` — build artifacts, not source
+*.tar
