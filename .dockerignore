@@ -1,8 +1,14 @@
 .git
-node_modules
+**/node_modules
 .vscode
 .env
 .DS_Store
 *.sketch
 config.yaml
 web/app/dist
+web/app/build
+build/
+screenshots/
+docs/
+e2e-tests/
+*.markdown

@@ -1,0 +1,28 @@
+# Stage 1: build the UI
+FROM node:18-alpine AS ui-builder
+WORKDIR /app/web/app
+COPY web/app/package*.json ./
+RUN npm install --silent
+COPY web/app/ ./
+ARG VERSION=2.0.0-custom
+RUN VERSION=${VERSION} npx snowpack build
+
+# Stage 2: run with Deno (no compilation needed)
+FROM denoland/deno:1.40.0
+WORKDIR /app
+
+# Copy source and built UI
+COPY --from=ui-builder /app/web/app/build /app/web/app/build
+COPY cmd/ ./cmd/
+COPY internal/ ./internal/
+COPY types/ ./types/
+COPY configs/ ./configs/
+COPY web/template/ ./web/template/
+COPY deps.ts deps.lock VERSION ./
+
+EXPOSE 8000
+
+# Cache dependencies
+RUN deno cache --unstable --import-map=./configs/import_map.json ./cmd/moviematch/main.ts
+
+ENTRYPOINT ["deno", "run", "-A", "--unstable", "--import-map=./configs/import_map.json", "./cmd/moviematch/main.ts"]
