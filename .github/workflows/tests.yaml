@@ -23,7 +23,7 @@ jobs:
         uses: denoland/setup-deno@v1
         with:
           deno-version: ${{ env.DENO_VERSION }}
-      - run: just install
+      - run: just install-node-modules
         name: Install dependencies
       - run: just lint
         name: Lint
