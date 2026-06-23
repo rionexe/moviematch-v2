@@ -2,16 +2,24 @@
   --mm-blue-hue: 240;
   --mm-red-hue: 360;
 
+  /* Brand palette */
+  --mm-brand: #4f7a57;
+  --mm-brand-dark: #3d5e44;
+  --mm-cream: #f4efe1;
+  --mm-bg-from: #1a1228;
+  --mm-bg-to: #2d1b3d;
+
+  /* Semantic tokens */
   --mm-black: hsl(var(--mm-blue-hue) 0% 20%);
   --mm-black-lighter: hsl(var(--mm-blue-hue) 0% 40%);
-  --mm-light-red: hsl(var(--mm-red-hue) 76% 60%);
-  --mm-dark-red: hsl(var(--mm-red-hue) 76% 55%);
+  --mm-light-red: var(--mm-brand);
+  --mm-dark-red: var(--mm-brand-dark);
   --mm-blue: hsl(var(--mm-blue-hue) 48% 55%);
   --mm-pale-blue: hsl(var(--mm-blue-hue) 40% 60%);
   --mm-white: hsl(var(--mm-blue-hue) 1% 100%);
   --mm-plex-color: hsl(41 100% 25%);
   --mm-plex-highlight-color: hsl(41 100% 30%);
-  --mm-line-color: hsl(var(--mm-blue-hue) 22% 90%);
+  --mm-line-color: rgba(255, 255, 255, 0.15);
   --mm-success-color: hsl(110 40% 40%);
   --mm-failure-color: hsl(var(--mm-red-hue) 50% 50%);
   --mm-add-color: hsl(var(--mm-blue-hue), 46%, 82%);
@@ -66,13 +74,10 @@ select {
 }
 
 body {
-  background: linear-gradient(
-    135deg,
-    hsl(var(--mm-blue-hue) 26% 80%) 0%,
-    hsl(var(--mm-blue-hue) 22% 90%) 100%
-  );
+  background-image: linear-gradient(160deg, var(--mm-bg-from) 0%, var(--mm-bg-to) 100%);
+  background-attachment: fixed;
   background-size: cover;
-  color: var(--mm-black);
+  color: #f0f0f0;
   min-height: calc(var(--vh) * 100);
   text-rendering: optimizeSpeed;
   line-height: 1.5;

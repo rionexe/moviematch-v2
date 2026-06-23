@@ -12,6 +12,17 @@ import { Tr } from "../atoms/Tr";
 
 import styles from "./Create.module.css";
 
+const AGE_OPTIONS = [
+  { value: 2, label: "2 · TV-Y" },
+  { value: 6, label: "6 · G · TV-G" },
+  { value: 7, label: "7 · TV-Y7" },
+  { value: 10, label: "10 · PG · TV-PG" },
+  { value: 13, label: "13 · PG-13" },
+  { value: 14, label: "14 · TV-14" },
+  { value: 17, label: "17 · R · TV-MA" },
+  { value: 18, label: "18 · NC-17" },
+];
+
 export const CreateScreen = () => {
   const [{ translations, createRoom, error, routeParams }, dispatch] = useStore(
     [
@@ -23,6 +34,9 @@ export const CreateScreen = () => {
   );
   const [roomName, setRoomName] = useState<string>(routeParams?.roomName ?? "");
   const [roomNameError, setRoomNameError] = useState<string | null>(null);
+  const [minAge, setMinAge] = useState<number | undefined>(undefined);
+  const [maxAge, setMaxAge] = useState<number | undefined>(undefined);
+  const [includeUnrated, setIncludeUnrated] = useState(false);
   const filters = useRef(new Map<number, Filter>());
   const handleCreateRoom = useCallback(async () => {
     if (!roomName) {
@@ -36,10 +50,13 @@ export const CreateScreen = () => {
         payload: {
           roomName,
           filters: [...filters.current.values()],
+          ...(minAge !== undefined ? { minAge } : {}),
+          ...(maxAge !== undefined ? { maxAge } : {}),
+          includeUnrated,
         },
       });
     }
-  }, [roomName]);
+  }, [roomName, minAge, maxAge, includeUnrated]);
 
   useEffect(() => {
     dispatch({ type: "requestFilters" });
@@ -64,6 +81,48 @@ export const CreateScreen = () => {
 
         <div className={styles.filters}>
           <h2 className={styles.filtersTitle}>Filters</h2>
+
+          <div className={styles.ageFilters}>
+            <label className={styles.ageLabel}>
+              Min age
+              <select
+                className={styles.ageSelect}
+                value={minAge ?? ""}
+                onChange={(e) =>
+                  setMinAge(e.target.value ? Number(e.target.value) : undefined)}
+              >
+                <option value="">Any</option>
+                {AGE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </label>
+
+            <label className={styles.ageLabel}>
+              Max age
+              <select
+                className={styles.ageSelect}
+                value={maxAge ?? ""}
+                onChange={(e) =>
+                  setMaxAge(e.target.value ? Number(e.target.value) : undefined)}
+              >
+                <option value="">Any</option>
+                {[...AGE_OPTIONS].reverse().map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </label>
+
+            <label className={styles.unratedLabel}>
+              <input
+                type="checkbox"
+                checked={includeUnrated}
+                onChange={(e) => setIncludeUnrated(e.target.checked)}
+              />
+              Include unrated
+            </label>
+          </div>
+
           <AddRemoveList
             initialChildren={0}
             onRemove={(i) => filters.current.delete(i)}

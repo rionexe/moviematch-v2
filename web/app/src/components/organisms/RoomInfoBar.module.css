@@ -1,14 +1,18 @@
+.infoBarWrapper {
+  width: 100%;
+}
+
 .infoBar {
   width: 100vw;
   display: grid;
-  grid-template: 1fr / 1fr 1fr 1fr;
-  background-color: hsl(var(--mm-red-hue), 10%, 14%);
+  grid-template: 1fr / 1fr 1fr auto 1fr;
+  background-color: var(--mm-brand-dark);
   font-family: system-ui;
   font-weight: 600;
   font-size: 0.9rem;
-  color: hsl(var(--mm-red-hue), 5%, 90%);
+  color: var(--mm-cream);
   padding: var(--s2) var(--s3);
-  box-shadow: -1px 3px 8px 1px rgba(33, 33, 33, 0.3);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
 }
 
 .item {
@@ -32,8 +36,8 @@
 .matchCount {
   position: absolute;
   width: 3.5rem;
-  background-color: var(--mm-light-red);
-  color: var(--mm-white);
+  background-color: var(--mm-brand);
+  color: var(--mm-cream);
   top: -125%;
   border-radius: var(--s3);
   transform: translateX(-50%);
@@ -45,6 +49,44 @@
 .matchCountTitle {
   position: relative;
   top: var(--s2);
+}
+
+.occupancyButton {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  opacity: 0.8;
+  cursor: pointer;
+  padding: 0 var(--s2);
+  white-space: nowrap;
+}
+
+.occupancyButton:hover {
+  opacity: 1;
+}
+
+.userList {
+  list-style: none;
+  padding: var(--s2) var(--s3);
+  margin: 0;
+  background-color: var(--mm-brand-dark);
+  opacity: 0.9;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2) var(--s4);
+}
+
+.userItem {
+  display: flex;
+  gap: var(--s2);
+  font-size: 0.8rem;
+  color: hsl(var(--mm-red-hue), 5%, 75%);
+}
+
+.userProgress {
+  opacity: 0.6;
 }
 
 @media screen and (min-width: 52em) {
