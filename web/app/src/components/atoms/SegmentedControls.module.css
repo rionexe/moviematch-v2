@@ -1,13 +1,11 @@
 :root {
-  --scBackgroundColor: hsl(240deg 25% 75%);
-  --scActiveColor: var(--mm-black);
-  --scTextColor: var(--mm-black);
-  --scBorderRadius: 0.25rem;
-  --scBorderWidth: 3px;
+  --scTextColor: rgba(244, 239, 225, 0.7);
+  --scBorderRadius: 999px;
   --scItemFontSize: 0.875rem;
   --scItemPadding: 2px 12px;
 }
 
+/* V1 glass mode-toggle: a translucent blurred pill track holding the segments. */
 .controls {
   display: flex;
   place-content: center;
@@ -20,15 +18,27 @@
   grid-auto-columns: 1fr;
   grid-auto-flow: column;
   grid-auto-rows: minmax(0, 1fr);
-  padding: 0;
+  padding: 4px;
   margin: 0;
+  background: var(--mm-glass-bg);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--scBorderRadius);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
 }
 
 .item {
-  background-color: var(--scBackgroundColor);
-  border: var(--scBorderWidth) solid transparent;
+  background-color: transparent;
+  /* transparent border so the active rim doesn't shift layout between segments */
+  border: 1px solid transparent;
+  color: var(--scTextColor);
   text-align: center;
   list-style: none;
+  border-radius: var(--scBorderRadius);
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    box-shadow 120ms ease;
 }
 
 .option {
@@ -55,23 +65,30 @@
 }
 
 .item:not(:first-child) {
-  margin-left: 1px;
+  margin-left: 2px;
 }
 
 @media (hover: hover) {
-  .item:hover {
-    border-color: var(--scActiveColor);
+  .item:not(.itemSelected):hover {
+    color: var(--mm-cream);
+    background-color: rgba(255, 255, 255, 0.06);
   }
 }
 
 .itemPadding {
-  padding: var(--s1);
+  padding: var(--s2) var(--s1);
 }
 
+/* Active segment borrows the primary button's sheen + rim so it reads as the
+   same glass family, with a softer shadow so it stays subordinate (V1 .mode-option.is-active). */
 .itemSelected {
   composes: item;
-  background-color: var(--mm-pale-blue);
-  color: var(--mm-white);
-  border-color: var(--mm-pale-blue);
-  font-weight: 500;
+  background-color: var(--mm-brand);
+  background-image: var(--mm-glass-sheen);
+  color: var(--mm-cream);
+  border-color: var(--mm-glass-rim);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  font-weight: 600;
 }

@@ -27,22 +27,45 @@
 
 .primaryButton {
   composes: button;
+  /* V1 glass button: brand fill + top sheen + bright rim + drop shadow so it
+     reads as a raised, pressable control (style.css .submit-button). */
   background-color: var(--bg-color);
-  padding: var(--s3) var(--s1);
-  color: var(--mm-white);
-  transition: background-color var(--mm-transition-duration) ease-in-out;
+  background-image: var(--mm-glass-sheen);
+  border: 1px solid var(--mm-glass-rim);
+  border-radius: var(--s4);
+  padding: var(--s3) var(--s4);
+  color: var(--text-color, var(--mm-white));
+  font-weight: bold;
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition:
+    transform 80ms ease,
+    box-shadow 120ms ease,
+    filter 120ms ease;
 }
 
-.primaryButton:focus {
-  background-color: var(--bg-highlight-color);
-  outline: 5px auto Highlight;
-  outline: 5px auto -webkit-focus-ring-color;
+.primaryButton:focus-visible {
+  outline: 2px solid rgba(244, 239, 225, 0.75);
+  outline-offset: 2px;
 }
 
 @media (hover: hover) {
   .primaryButton:hover {
-    background-color: var(--bg-highlight-color);
+    filter: brightness(1.08);
+    box-shadow:
+      0 9px 24px rgba(0, 0, 0, 0.42),
+      inset 0 1px 0 rgba(255, 255, 255, 0.34);
   }
+}
+
+/* Pressed: sink the button and swap the drop shadow for an inset one. */
+.primaryButton:active {
+  transform: translateY(2px);
+  filter: brightness(0.95);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.3),
+    inset 0 2px 6px rgba(0, 0, 0, 0.42);
 }
 
 .secondaryButton {
@@ -75,18 +98,22 @@
   background-color: transparent;
   border: 2px solid transparent;
   padding: var(--s1);
-  color: var(--mm-blue);
-  transition: background-color var(--mm-transition-duration) ease-in-out;
+  color: rgba(244, 239, 225, 0.75);
+  transition:
+    background-color var(--mm-transition-duration) ease-in-out,
+    color var(--mm-transition-duration) ease-in-out;
 }
 
-.tertiaryButton:focus {
-  background-color: hsl(var(--mm-blue-hue), 20%, 75%);
-  outline: 5px auto Highlight;
-  outline: 5px auto -webkit-focus-ring-color;
+.tertiaryButton:focus-visible {
+  color: var(--mm-cream);
+  background-color: rgba(255, 255, 255, 0.08);
+  outline: 2px solid rgba(244, 239, 225, 0.6);
+  outline-offset: 2px;
 }
 
 @media (hover: hover) {
   .tertiaryButton:hover {
-    background-color: hsl(var(--mm-blue-hue), 20%, 75%);
+    color: var(--mm-cream);
+    background-color: rgba(255, 255, 255, 0.08);
   }
 }

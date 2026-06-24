@@ -25,14 +25,14 @@ export const RoomInfoBar = () => {
             <Tr name="MATCHES_SECTION_TITLE" />
           </p>
         </div>
-        <button
-          className={styles.occupancyButton}
-          onClick={() => setShowUsers((v) => !v)}
-          aria-expanded={showUsers}
-        >
-          {users.length} in room
-        </button>
-        <div className={styles.item}>
+        <div className={styles.itemEnd}>
+          <button
+            className={styles.occupancyButton}
+            onClick={() => setShowUsers((v) => !v)}
+            aria-expanded={showUsers}
+          >
+            {users.length} in room
+          </button>
           <ShareMenu />
         </div>
       </div>

@@ -14,11 +14,12 @@ import { loginAnonymous } from "./login_test.ts";
 browserTest(
   "Create Room - No filters",
   async (page: Page, emulatedName?: string) => {
-    // JoinScreen
+    // RoomEntry screen (defaults to Join) — switch to the Create tab.
     await loginAnonymous(page, "Luke");
-    await page.click(btnSelector("create-room"));
+    await page.waitForSelector(selector("mode-create"));
+    await page.click(selector("mode-create"));
 
-    // CreateScreen
+    // Create mode
     await page.waitForSelector(textInputSelector("roomName"));
     await page.type(textInputSelector("roomName"), "Abc123" + Date.now());
     await page.click(btnSelector("create-room"));
@@ -35,11 +36,12 @@ browserTest(
 browserTest(
   "Create Room - With filters",
   async (page: Page, emulatedName?: string) => {
-    // JoinScreen
+    // RoomEntry screen (defaults to Join) — switch to the Create tab.
     await loginAnonymous(page, "Luke");
-    await page.click(btnSelector("create-room"));
+    await page.waitForSelector(selector("mode-create"));
+    await page.click(selector("mode-create"));
 
-    // CreateScreen
+    // Create mode
     await page.waitForSelector(textInputSelector("roomName"));
     await page.type(textInputSelector("roomName"), "Filters-" + Date.now());
 

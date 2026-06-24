@@ -69,7 +69,7 @@
 
 @media (hover: hover) {
   .moreInfoButton:hover {
-    color: hsl(var(--mm-blue-hue) 50% 70%);
+    color: var(--mm-brand-light);
   }
 }
 

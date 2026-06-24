@@ -29,4 +29,13 @@
   .container > * {
     margin-left: var(--s2);
   }
+
+  /* Footer row: escape action hugs the left, primary hugs the right. */
+  .spread {
+    justify-content: space-between;
+  }
+
+  .spread > * {
+    margin-left: 0;
+  }
 }

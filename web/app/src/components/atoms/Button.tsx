@@ -10,6 +10,7 @@ interface ButtonProps {
   disabled?: boolean;
   color?: Color;
   highlightColor?: Color;
+  textColor?: string;
   type?: React.ButtonHTMLAttributes<HTMLButtonElement>["type"];
   testHandle?: string;
 }
@@ -22,6 +23,7 @@ export const Button = ({
   disabled,
   color,
   highlightColor,
+  textColor,
   type,
   testHandle,
 }: ButtonProps) => (
@@ -33,6 +35,7 @@ export const Button = ({
       ...(highlightColor
         ? { "--bg-highlight-color": `var(--mm-${highlightColor})` }
         : {}),
+      ...(textColor ? { "--text-color": textColor } : {}),
     }}
     onClick={onPress}
     type={type ?? "button"}

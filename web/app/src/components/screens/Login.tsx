@@ -59,6 +59,7 @@ export const LoginScreen = () => {
             appearance="Primary"
             color="plex-color"
             highlightColor="plex-highlight-color"
+            textColor="#000"
             testHandle="login-plex"
             onPress={() => {
               dispatch({ type: "plexLogin" });

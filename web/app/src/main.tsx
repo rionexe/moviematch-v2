@@ -5,8 +5,7 @@ import { Provider, useDispatch } from "react-redux";
 import "./main.css";
 
 import { LoginScreen } from "./components/screens/Login";
-import { JoinScreen } from "./components/screens/Join";
-import { CreateScreen } from "./components/screens/Create";
+import { RoomEntryScreen } from "./components/screens/RoomEntry";
 import { RoomScreen } from "./components/screens/Room";
 import { Loading } from "./components/screens/Loading";
 import { ToastList } from "./components/atoms/Toast";
@@ -34,8 +33,9 @@ const MovieMatch = () => {
         > = {
           loading: Loading,
           login: LoginScreen,
-          join: JoinScreen,
-          createRoom: CreateScreen,
+          // Join + Create are one unified screen with a mode toggle.
+          join: RoomEntryScreen,
+          createRoom: RoomEntryScreen,
           room: RoomScreen,
           config: ConfigScreen,
         };

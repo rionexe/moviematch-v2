@@ -5,27 +5,40 @@
   /* Brand palette */
   --mm-brand: #4f7a57;
   --mm-brand-dark: #3d5e44;
+  --mm-brand-light: #6fa178;
   --mm-cream: #f4efe1;
   --mm-bg-from: #1a1228;
   --mm-bg-to: #2d1b3d;
+
+  /* V1 glass surface tokens */
+  --mm-glass-bg: rgba(22, 15, 35, 0.62);
+  --mm-glass-border: rgba(255, 255, 255, 0.14);
+  --mm-glass-rim: rgba(255, 255, 255, 0.22);
+  --mm-glass-sheen: linear-gradient(
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0)
+  );
 
   /* Semantic tokens */
   --mm-black: hsl(var(--mm-blue-hue) 0% 20%);
   --mm-black-lighter: hsl(var(--mm-blue-hue) 0% 40%);
   --mm-light-red: var(--mm-brand);
   --mm-dark-red: var(--mm-brand-dark);
-  --mm-blue: hsl(var(--mm-blue-hue) 48% 55%);
-  --mm-pale-blue: hsl(var(--mm-blue-hue) 40% 60%);
-  --mm-white: hsl(var(--mm-blue-hue) 1% 100%);
-  --mm-plex-color: hsl(41 100% 25%);
-  --mm-plex-highlight-color: hsl(41 100% 30%);
+  /* Accent system folded onto V1's sage-green brand (was indigo/lavender beta) */
+  --mm-blue: var(--mm-brand);
+  --mm-pale-blue: var(--mm-brand-light);
+  --mm-white: var(--mm-cream);
+  /* Plex brand pairing: bright yellow field, black content (set per-button) */
+  --mm-plex-color: #ebaf00;
+  --mm-plex-highlight-color: #ffbe0a;
   --mm-line-color: rgba(255, 255, 255, 0.15);
   --mm-success-color: hsl(110 40% 40%);
   --mm-failure-color: hsl(var(--mm-red-hue) 50% 50%);
-  --mm-add-color: hsl(var(--mm-blue-hue), 46%, 82%);
-  --mm-add-highlight-color: hsl(var(--mm-blue-hue), 76%, 90%);
-  --mm-remove-color: hsl(var(--mm-red-hue), 56%, 72%);
-  --mm-remove-highlight-color: hsl(var(--mm-red-hue), 59%, 84%);
+  /* Add = green (constructive), Remove = muted destructive red (matches V1 error) */
+  --mm-add-color: var(--mm-brand);
+  --mm-add-highlight-color: var(--mm-brand-light);
+  --mm-remove-color: hsl(var(--mm-red-hue), 56%, 62%);
+  --mm-remove-highlight-color: hsl(var(--mm-red-hue), 59%, 72%);
 
   --s1: 0.25rem; /* 4px */
   --s2: 0.5rem; /* 8px */
@@ -85,7 +98,7 @@ body {
   min-height: calc(var(--vh) * 100);
   text-rendering: optimizeSpeed;
   line-height: 1.5;
-  font-family: "Helvetica Neue", system-ui, Helvetica, sans-serif;
+  font-family: system-ui;
   overscroll-behavior: none;
   scroll-behavior: smooth;
 }

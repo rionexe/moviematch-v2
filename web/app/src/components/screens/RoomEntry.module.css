@@ -1,0 +1,65 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--s5);
+  width: 100%;
+  flex-grow: 1;
+  max-width: 35rem;
+  align-self: center;
+}
+
+.filters {
+  margin-top: var(--s4);
+}
+
+.filtersTitle {
+  margin-bottom: var(--s3);
+  font-size: 1.2rem;
+  color: var(--mm-cream);
+}
+
+.ageFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+  align-items: flex-end;
+}
+
+.ageLabel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  font-size: 0.875rem;
+  color: rgba(244, 239, 225, 0.7);
+}
+
+/* Glass select to match V1's .select-input: translucent field, cream text. */
+.ageSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  min-width: 10rem;
+  padding: var(--s2) 2rem var(--s2) var(--s2);
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--s1);
+  color: var(--mm-cream);
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%234f7a57' stroke-width='2' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+}
+
+.ageSelect option {
+  color: var(--mm-bg-from);
+}
+
+.unratedLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  font-size: 0.875rem;
+  color: rgba(244, 239, 225, 0.7);
+  padding-bottom: var(--s2);
+  cursor: pointer;
+}

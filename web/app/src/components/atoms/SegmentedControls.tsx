@@ -23,6 +23,7 @@ export interface SegmentedControlsProps extends AriaAttributes {
 interface SegmentedControlOptionProps {
   value: string;
   children: ReactNode;
+  testHandle?: string;
 }
 
 interface SegmentedControlContext {
@@ -74,13 +75,17 @@ export const SegmentedControls = ({
 export const SegmentedControlOption = ({
   value,
   children,
+  testHandle,
 }: SegmentedControlOptionProps) => {
   const { name, value: currentValue } = useContext(SegmentedControlContext);
 
   const isSelected = value === currentValue;
 
   return (
-    <label className={styles.option}>
+    <label
+      className={styles.option}
+      data-test-handle={testHandle}
+    >
       <VisuallyHidden>
         <input
           type="radio"
