@@ -115,7 +115,9 @@ export const createStore = () => {
           : existingLogin,
       });
     } else {
-      dispatch({ type: "navigate", payload: { route: "login" } });
+      // No sign-in screen: open straight on the Join/Create screen, where the
+      // name is entered and login is sent implicitly on submit.
+      dispatch({ type: "navigate", payload: { route: "join" } });
     }
   });
 

@@ -97,7 +97,7 @@ export const reducer: Reducer<Store, Actions> = (
         ...state,
         user: undefined,
         room: undefined,
-        route: "login",
+        route: "join",
       };
     }
     case "loginError":
@@ -105,7 +105,8 @@ export const reducer: Reducer<Store, Actions> = (
     case "createRoomError": {
       let route = state.route;
 
-      if (action.type === "loginError") route = "login";
+      // Sign-in screen removed; login errors surface on the Join/Create screen.
+      if (action.type === "loginError") route = "join";
       if (action.type === "joinRoomError") route = "join";
       if (action.type === "createRoomError") route = "createRoom";
 

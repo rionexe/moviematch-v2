@@ -30,21 +30,29 @@ const AGE_OPTIONS = [
 type Mode = "join" | "create";
 
 export const RoomEntryScreen = () => {
-  const [{ translations, createRoom, error, route, routeParams, room }, dispatch] =
-    useStore([
-      "translations",
-      "createRoom",
-      "error",
-      "route",
-      "routeParams",
-      "room",
-    ]);
+  const [
+    { translations, createRoom, error, route, routeParams, room, user },
+    dispatch,
+  ] = useStore([
+    "translations",
+    "createRoom",
+    "error",
+    "route",
+    "routeParams",
+    "room",
+    "user",
+  ]);
 
   // Land in the mode that matches the current route, so a create/join error
   // (which routes back here) keeps the user on the tab they were using.
   const [mode, setMode] = useState<Mode>(
     route === "createRoom" ? "create" : "join",
   );
+
+  const [userName, setUserName] = useState<string>(
+    user?.userName ?? localStorage.getItem("userName") ?? "",
+  );
+  const [userNameError, setUserNameError] = useState<string | null>(null);
 
   const [roomName, setRoomName] = useState<string>(
     room?.name ?? routeParams?.roomName ??
@@ -66,9 +74,25 @@ export const RoomEntryScreen = () => {
   }, [mode]);
 
   const handleSubmit = useCallback(() => {
+    const name = userName.trim();
+
+    if (!name) {
+      setUserNameError(translations?.FIELD_REQUIRED_ERROR!);
+      return;
+    }
+
     if (!roomName) {
       setRoomNameError(translations?.FIELD_REQUIRED_ERROR!);
       return;
+    }
+
+    // The server requires a logged-in user before create/join. There is no
+    // sign-in screen anymore, so log in implicitly (anonymously) here whenever
+    // the entered name isn't the one already associated with this connection.
+    // Messages are sent in dispatch order and processed sequentially by the
+    // server, so the login is handled before the create/join that follows.
+    if (name !== user?.userName) {
+      dispatch({ type: "login", payload: { userName: name } });
     }
 
     if (mode === "join") {
@@ -86,7 +110,7 @@ export const RoomEntryScreen = () => {
         includeUnrated,
       },
     });
-  }, [mode, roomName, minAge, maxAge, includeUnrated, translations]);
+  }, [mode, userName, roomName, minAge, maxAge, includeUnrated, translations, user]);
 
   return (
     <Layout>
@@ -112,6 +136,18 @@ export const RoomEntryScreen = () => {
         </SegmentedControls>
 
         {error && <ErrorMessage message={error.message ?? error.type ?? ""} />}
+
+        <Field
+          label={<Tr name="LOGIN_NAME" />}
+          name="given-name"
+          autoComplete="given-name"
+          value={userName}
+          errorMessage={userNameError ?? undefined}
+          onChange={(e) => {
+            setUserNameError(null);
+            setUserName(e.target.value);
+          }}
+        />
 
         <Field
           label={<Tr name="LOGIN_ROOM_NAME" />}
@@ -203,7 +239,6 @@ export const RoomEntryScreen = () => {
           <Button
             appearance="Primary"
             type="submit"
-            onPress={handleSubmit}
             testHandle={mode === "create" ? "create-room" : "join-room"}
           >
             <Tr name={mode === "create" ? "CREATE_ROOM" : "JOIN_ROOM"} />

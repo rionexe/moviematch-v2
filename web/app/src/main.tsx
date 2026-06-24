@@ -4,7 +4,6 @@ import { Provider, useDispatch } from "react-redux";
 
 import "./main.css";
 
-import { LoginScreen } from "./components/screens/Login";
 import { RoomEntryScreen } from "./components/screens/RoomEntry";
 import { RoomScreen } from "./components/screens/Room";
 import { Loading } from "./components/screens/Loading";
@@ -32,7 +31,9 @@ const MovieMatch = () => {
           () => JSX.Element
         > = {
           loading: Loading,
-          login: LoginScreen,
+          // Sign-in screen removed; identity is collected on the room screen.
+          // "login" is kept as a harmless alias so the route map stays exhaustive.
+          login: RoomEntryScreen,
           // Join + Create are one unified screen with a mode toggle.
           join: RoomEntryScreen,
           createRoom: RoomEntryScreen,
