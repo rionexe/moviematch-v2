@@ -1,19 +1,28 @@
+/* V1 glass field: translucent white fill, cream text, soft rim (style.css
+   .login-form input) so it reads on the dark gradient. */
 .textInput {
   width: 100%;
   height: 3rem;
   appearance: none;
   -webkit-appearance: none;
-  border: 2px solid var(--mm-black);
-  background-color: transparent;
-  border-radius: var(--s1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0.3rem;
   padding: var(--s2);
+  color: var(--mm-cream);
+  font-size: 1.2rem;
   box-shadow: none;
 }
 
+.textInput::placeholder {
+  color: rgba(244, 239, 225, 0.45);
+}
+
 .textInput:focus {
-  border: 2px solid var(--mm-blue);
+  border-color: var(--mm-brand-light);
+  outline: none;
 }
 
 .invalid {
-  border: 2px solid var(--mm-dark-red);
+  border-color: var(--mm-remove-color);
 }

@@ -11,11 +11,32 @@ export const ShareMenu = () => {
 
   if (!room) return null;
 
-  const handleShare = async () => {
-    const shareUrl = new URL(location.origin);
-    shareUrl.searchParams.set("roomName", room.name ?? "");
+  // navigator.clipboard is undefined in insecure contexts (plain-HTTP LAN access),
+  // so fall back to a temporary <textarea> + execCommand so copying still works.
+  const copyText = async (text: string) => {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
     try {
-      await navigator.clipboard.writeText(shareUrl.href);
+      if (!document.execCommand("copy")) {
+        throw new Error("execCommand copy failed");
+      }
+    } finally {
+      document.body.removeChild(textArea);
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      await copyText(room.name ?? "");
       dispatch({
         type: "addToast",
         payload: {

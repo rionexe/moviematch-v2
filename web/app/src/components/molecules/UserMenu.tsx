@@ -78,11 +78,11 @@ export const UserMenu = () => {
         {user && (
           <>
             <Avatar
-              userName={user.userName}
+              userName={user.displayName ?? user.userName}
               avatarUrl={user.avatarImage}
               progress={progress * 100}
             />
-            <p className={styles.userName}>{user.userName}</p>
+            <p className={styles.userName}>{user.displayName ?? user.userName}</p>
           </>
         )}
       </div>
@@ -119,9 +119,6 @@ export const UserMenu = () => {
         </MenuGroup>
         <MenuButton onClick={() => dispatch({ type: "leaveRoom" })}>
           Leave Room
-        </MenuButton>
-        <MenuButton onClick={() => dispatch({ type: "logout" })}>
-          Logout
         </MenuButton>
       </Popover>
     </>

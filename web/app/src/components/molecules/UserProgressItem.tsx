@@ -10,11 +10,11 @@ export const UserProgressItem = (
   return (
     <div className={styles.userProgress} {...props}>
       <Avatar
-        userName={user.userName}
+        userName={user.displayName ?? user.userName}
         avatarUrl={user.avatarImage}
         progress={progress * 100}
       />
-      <p className={styles.userName}>{user.userName}</p>
+      <p className={styles.userName}>{user.displayName ?? user.userName}</p>
     </div>
   );
 };

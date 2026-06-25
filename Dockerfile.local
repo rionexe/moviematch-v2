@@ -7,8 +7,10 @@ COPY web/app/ ./
 ARG VERSION=2.0.0-custom
 RUN VERSION=${VERSION} npx snowpack build
 
-# Stage 2: run with Deno (no compilation needed)
-FROM denoland/deno:1.40.0
+# Stage 2: run with Deno (no compilation needed).
+# Alpine base keeps the same Deno runtime but swaps the ~85MB Debian rootfs for
+# a ~7MB Alpine one, shrinking the image substantially.
+FROM denoland/deno:alpine-1.40.0
 WORKDIR /app
 
 # Copy source and built UI

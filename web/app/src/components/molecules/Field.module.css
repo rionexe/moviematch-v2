@@ -6,12 +6,14 @@
 }
 
 .label {
-  color: var(--mm-black);
-  font-weight: bold;
+  margin-left: var(--s1);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 .error {
-  color: var(--mm-dark-red);
+  color: #ffb4a8;
   font-weight: bold;
   margin-top: var(--s1);
 }

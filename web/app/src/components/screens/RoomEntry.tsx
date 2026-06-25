@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { Filter } from "../../../../../types/moviematch";
 import { useStore } from "../../store";
 import { Button } from "../atoms/Button";
-import { ButtonContainer } from "../layout/ButtonContainer";
 import { ErrorMessage } from "../atoms/ErrorMessage";
 import { Field } from "../molecules/Field";
 import { FilterField } from "../molecules/FilterField";
@@ -29,6 +28,14 @@ const AGE_OPTIONS = [
 
 type Mode = "join" | "create";
 
+// Uppercase + digits (36^4 ≈ 1.7M combos); the server still guards duplicates.
+const ROOM_CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const generateRoomCode = () =>
+  Array.from(
+    { length: 4 },
+    () => ROOM_CODE_CHARS[Math.floor(Math.random() * ROOM_CODE_CHARS.length)],
+  ).join("");
+
 export const RoomEntryScreen = () => {
   const [
     { translations, createRoom, error, route, routeParams, room, user },
@@ -50,7 +57,8 @@ export const RoomEntryScreen = () => {
   );
 
   const [userName, setUserName] = useState<string>(
-    user?.userName ?? localStorage.getItem("userName") ?? "",
+    // Prefer the display name so we never prefill the hidden unique key (e.g. "John2").
+    user?.displayName ?? user?.userName ?? localStorage.getItem("userName") ?? "",
   );
   const [userNameError, setUserNameError] = useState<string | null>(null);
 
@@ -81,7 +89,8 @@ export const RoomEntryScreen = () => {
       return;
     }
 
-    if (!roomName) {
+    // Join needs a room code; Create generates one automatically (no field).
+    if (mode === "join" && !roomName.trim()) {
       setRoomNameError(translations?.FIELD_REQUIRED_ERROR!);
       return;
     }
@@ -91,19 +100,22 @@ export const RoomEntryScreen = () => {
     // the entered name isn't the one already associated with this connection.
     // Messages are sent in dispatch order and processed sequentially by the
     // server, so the login is handled before the create/join that follows.
-    if (name !== user?.userName) {
+    if (name !== (user?.displayName ?? user?.userName)) {
       dispatch({ type: "login", payload: { userName: name } });
     }
 
     if (mode === "join") {
-      dispatch({ type: "joinRoom", payload: { roomName } });
+      dispatch({
+        type: "joinRoom",
+        payload: { roomName: roomName.trim().toUpperCase() },
+      });
       return;
     }
 
     dispatch({
       type: "createRoom",
       payload: {
-        roomName,
+        roomName: generateRoomCode(),
         filters: [...filters.current.values()],
         ...(minAge !== undefined ? { minAge } : {}),
         ...(maxAge !== undefined ? { maxAge } : {}),
@@ -135,115 +147,122 @@ export const RoomEntryScreen = () => {
           </SegmentedControlOption>
         </SegmentedControls>
 
-        {error && <ErrorMessage message={error.message ?? error.type ?? ""} />}
+        <div className={styles.card}>
+          {error && (
+            <ErrorMessage message={error.message ?? error.type ?? ""} />
+          )}
 
-        <Field
-          label={<Tr name="LOGIN_NAME" />}
-          name="given-name"
-          autoComplete="given-name"
-          value={userName}
-          errorMessage={userNameError ?? undefined}
-          onChange={(e) => {
-            setUserNameError(null);
-            setUserName(e.target.value);
-          }}
-        />
+          <Field
+            label={<Tr name="LOGIN_NAME" />}
+            name="given-name"
+            autoComplete="given-name"
+            value={userName}
+            errorMessage={userNameError ?? undefined}
+            onChange={(e) => {
+              setUserNameError(null);
+              setUserName(e.target.value);
+            }}
+          />
 
-        <Field
-          label={<Tr name="LOGIN_ROOM_NAME" />}
-          name="roomName"
-          value={roomName}
-          errorMessage={roomNameError ?? undefined}
-          onChange={(e) => {
-            setRoomNameError(null);
-            setRoomName(e.target.value);
-          }}
-        />
+          {/* Join enters a room code; Create auto-generates one on submit. */}
+          {mode === "join" && (
+            <Field
+              label={<Tr name="LOGIN_ROOM_NAME" />}
+              name="roomName"
+              value={roomName}
+              errorMessage={roomNameError ?? undefined}
+              onChange={(e) => {
+                setRoomNameError(null);
+                setRoomName(e.target.value);
+              }}
+            />
+          )}
 
-        {mode === "create" && (
-          <div className={styles.filters}>
-            <h2 className={styles.filtersTitle}>Filters</h2>
+          {mode === "create" && (
+            <div className={styles.filters}>
+              <h2 className={styles.filtersTitle}>Filters</h2>
 
-            <div className={styles.ageFilters}>
-              <label className={styles.ageLabel}>
-                Min age
-                <select
-                  className={styles.ageSelect}
-                  value={minAge ?? ""}
-                  onChange={(e) =>
-                    setMinAge(e.target.value ? Number(e.target.value) : undefined)}
-                >
-                  <option value="">Any</option>
-                  {AGE_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-              </label>
+              <div className={styles.ageFilters}>
+                <label className={styles.ageLabel}>
+                  Min age
+                  <select
+                    className={styles.ageSelect}
+                    value={minAge ?? ""}
+                    onChange={(e) =>
+                      setMinAge(
+                        e.target.value ? Number(e.target.value) : undefined,
+                      )}
+                  >
+                    <option value="">Any</option>
+                    {AGE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                </label>
 
-              <label className={styles.ageLabel}>
-                Max age
-                <select
-                  className={styles.ageSelect}
-                  value={maxAge ?? ""}
-                  onChange={(e) =>
-                    setMaxAge(e.target.value ? Number(e.target.value) : undefined)}
-                >
-                  <option value="">Any</option>
-                  {[...AGE_OPTIONS].reverse().map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-              </label>
+                <label className={styles.ageLabel}>
+                  Max age
+                  <select
+                    className={styles.ageSelect}
+                    value={maxAge ?? ""}
+                    onChange={(e) =>
+                      setMaxAge(
+                        e.target.value ? Number(e.target.value) : undefined,
+                      )}
+                  >
+                    <option value="">Any</option>
+                    {[...AGE_OPTIONS].reverse().map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                </label>
 
-              <label className={styles.unratedLabel}>
-                <input
-                  type="checkbox"
-                  checked={includeUnrated}
-                  onChange={(e) => setIncludeUnrated(e.target.checked)}
-                />
-                Include unrated
-              </label>
-            </div>
-
-            <AddRemoveList
-              initialChildren={0}
-              onRemove={(i) => filters.current.delete(i)}
-              testHandle="filter"
-            >
-              {(i) =>
-                createRoom?.availableFilters && (
-                  <FilterField
-                    key={i}
-                    name={String(i)}
-                    onChange={(filter) =>
-                      filter && filters.current.set(i, filter)}
-                    filters={createRoom.availableFilters}
-                    suggestions={createRoom?.filterValues}
-                    requestSuggestions={(key: string) => {
-                      dispatch({ type: "requestFilterValues", payload: { key } });
-                    }}
+                <label className={styles.unratedLabel}>
+                  <input
+                    type="checkbox"
+                    checked={includeUnrated}
+                    onChange={(e) => setIncludeUnrated(e.target.checked)}
                   />
-                )}
-            </AddRemoveList>
-          </div>
-        )}
+                  Include unrated
+                </label>
+              </div>
 
-        <ButtonContainer paddingTop="s5" spread>
-          <Button
-            appearance="Tertiary"
-            onPress={() => dispatch({ type: "logout" })}
-            testHandle="logout"
-          >
-            <Tr name="LOGOUT" />
-          </Button>
-          <Button
-            appearance="Primary"
-            type="submit"
-            testHandle={mode === "create" ? "create-room" : "join-room"}
-          >
-            <Tr name={mode === "create" ? "CREATE_ROOM" : "JOIN_ROOM"} />
-          </Button>
-        </ButtonContainer>
+              <AddRemoveList
+                initialChildren={0}
+                onRemove={(i) => filters.current.delete(i)}
+                testHandle="filter"
+              >
+                {(i) =>
+                  createRoom?.availableFilters && (
+                    <FilterField
+                      key={i}
+                      name={String(i)}
+                      onChange={(filter) =>
+                        filter && filters.current.set(i, filter)}
+                      filters={createRoom.availableFilters}
+                      suggestions={createRoom?.filterValues}
+                      requestSuggestions={(key: string) => {
+                        dispatch({
+                          type: "requestFilterValues",
+                          payload: { key },
+                        });
+                      }}
+                    />
+                  )}
+              </AddRemoveList>
+            </div>
+          )}
+
+          <div className={styles.submitRow}>
+            <Button
+              appearance="Primary"
+              type="submit"
+              testHandle={mode === "create" ? "create-room" : "join-room"}
+            >
+              <Tr name={mode === "create" ? "CREATE_ROOM" : "JOIN_ROOM"} />
+            </Button>
+          </div>
+        </div>
       </form>
     </Layout>
   );

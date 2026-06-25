@@ -1,7 +1,6 @@
 import React, { forwardRef, ReactNode, useState } from "react";
 import type { Media } from "../../../../../types/moviematch";
 
-import { InfoIcon } from "../icons/InfoIcon";
 import { ContentRatingSymbol } from "../icons/ContentRatingSymbol";
 import { StarIcon } from "../icons/StarIcon";
 import { Pill } from "../atoms/Pill";
@@ -11,7 +10,6 @@ import { ShareIcon } from "../icons/ShareIcon";
 
 export interface CardProps {
   title?: ReactNode;
-  href?: string;
   media: Media;
 
   style?: React.CSSProperties;
@@ -20,8 +18,8 @@ export interface CardProps {
 const formatTime = (milliseconds: number) =>
   `${Math.round(milliseconds / 1000 / 60)} minutes`;
 
-export const Card = forwardRef<HTMLDivElement & HTMLAnchorElement, CardProps>(
-  ({ media, title, href }, ref) => {
+export const Card = forwardRef<HTMLDivElement, CardProps>(
+  ({ media, title }, ref) => {
     const [showMoreInfo, setShowMoreInfo] = useState<boolean>(false);
 
     const { rootPath } = document.body.dataset;
@@ -37,73 +35,54 @@ export const Card = forwardRef<HTMLDivElement & HTMLAnchorElement, CardProps>(
       media.type === "movie" ? ` (${media.year})` : ""
     }`;
 
-    const Tag = href ? "a" : "div";
-
     return (
-      <Tag
+      <div
         ref={ref}
-        className={href ? styles.linkCard : styles.card}
-        {...(href
-          ? {
-            href,
-            target: /(iPhone|iPad)/.test(navigator.userAgent)
-              ? "_self"
-              : "_blank",
-          }
-          : {})}
+        className={styles.card}
+        onClick={() => setShowMoreInfo((v) => !v)}
       >
         <img
           className={styles.poster}
           src={srcSet[0]}
           srcSet={srcSet.join(", ")}
           alt={`${media.title} poster`}
+          draggable={false}
         />
-        {showMoreInfo
-          ? (
-            <div className={styles.moreInfo}>
-              <p className={styles.moreInfoTitle}>{mediaTitle}</p>
-              <div className={styles.moreInfoMetadata}>
-                <Pill>{media.year}</Pill>
-                <Pill>{formatTime(+media.duration)}</Pill>
+        {/* V1-style tap-to-flip: tapping the poster cross-fades this frosted detail
+            panel over it. The front is just the poster (no title bar / info button). */}
+        {showMoreInfo && (
+          <div className={styles.moreInfo}>
+            <p className={styles.moreInfoTitle}>{mediaTitle}</p>
+            {title && <p className={styles.moreInfoLikers}>{title}</p>}
+            <div className={styles.moreInfoMetadata}>
+              <Pill>{media.year}</Pill>
+              <Pill>{formatTime(+media.duration)}</Pill>
+              <Pill>
+                <StarIcon height="0.8rem" width="0.5rem" /> {media.rating}
+              </Pill>
+              {media.contentRating && (
                 <Pill>
-                  <StarIcon height="0.8rem" width="0.5rem" /> {media.rating}
+                  <ContentRatingSymbol
+                    rating={media.contentRating}
+                    size="1rem"
+                  />
                 </Pill>
-                {media.contentRating && (
-                  <Pill>
-                    <ContentRatingSymbol
-                      rating={media.contentRating}
-                      size="1rem"
-                    />
-                  </Pill>
-                )}
-                {media.genres.map((genre) => <Pill key={genre}>{genre}</Pill>)}
-                {!href && (
-                  <Pill href={media.linkUrl}>
-                    <span>Open in Plex</span>
-                    <ShareIcon />
-                  </Pill>
-                )}
-              </div>
-              <p className={styles.moreInfoDescription}>
-                {media.description}
-              </p>
+              )}
+              {media.genres.map((genre) => <Pill key={genre}>{genre}</Pill>)}
+              {/* Stop the click bubbling to the card so opening Plex doesn't flip it back */}
+              <span onClick={(e) => e.stopPropagation()}>
+                <Pill href={media.linkUrl}>
+                  <span>Open in Plex</span>
+                  <ShareIcon />
+                </Pill>
+              </span>
             </div>
-          )
-          : (
-            <div className={styles.titleContainer}>
-              <p className={styles.title}>{title ?? mediaTitle}</p>
-            </div>
-          )}
-        <button
-          className={styles.moreInfoButton}
-          onClick={(e) => {
-            e.preventDefault();
-            setShowMoreInfo(!showMoreInfo);
-          }}
-        >
-          <InfoIcon size="2rem" />
-        </button>
-      </Tag>
+            <p className={styles.moreInfoDescription}>
+              {media.description}
+            </p>
+          </div>
+        )}
+      </div>
     );
   },
 );

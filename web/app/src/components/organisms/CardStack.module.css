@@ -1,14 +1,15 @@
 .stack {
-  --card-height: min(calc(80vmin * 1.5), calc(var(--vh) * 75), 410px);
+  /* Poster size between V2's old 410px cap and V1's ~80vh. Tunable. */
+  --card-height: min(calc(80vmin * 1.5), calc(var(--vh) * 75), 620px);
   --card-width: calc(var(--card-height) * 0.66666);
   position: relative;
   width: 100%;
   display: flex;
   justify-content: center;
-  perspective: var(--card-height);
   overflow: hidden;
-  padding-top: calc(15px * 2 + env(safe-area-inset-top));
-  padding-bottom: calc(15px * 5);
+  /* Room for the up-and-left cascade of the cards behind the front one. */
+  padding-top: calc(95px + env(safe-area-inset-top));
+  padding-bottom: calc(15px * 2);
 }
 
 .emptyStack {
@@ -23,10 +24,16 @@
   position: absolute;
   touch-action: pan-y;
   user-select: none;
+  /* Only the front card is interactive — drag to swipe, tap to flip. The cards
+     behind it (and any card mid-swipe-off) are display-only. The front card is
+     marked explicitly in JS (.itemFront), NOT via :last-of-type, because a card
+     being swiped off lingers at the end of the list until removal is finalized. */
+  pointer-events: none;
 }
 
-.item:last-of-type {
+.itemFront {
   position: relative;
+  pointer-events: auto;
 }
 
 @keyframes fadeIn {

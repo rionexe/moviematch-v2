@@ -129,7 +129,12 @@ export interface LogoutError {
 export type Permissions = "CanCreateRoom";
 
 export interface User {
+  // Unique key within a room. May carry a hidden numeric suffix when two people
+  // share a name (e.g. "John", "John2"); never shown directly — use displayName.
   userName: string;
+  // The name to show in the UI (the base name the person entered). Falls back to
+  // userName when absent.
+  displayName?: string;
   permissions?: Permissions[]; // Not available in user*Room messages
   avatarImage?: string;
 }
@@ -191,6 +196,10 @@ export interface JoinRoomError {
 export interface JoinRoomSuccess {
   previousMatches: Match[];
   media: Media[];
+
+  // The caller's assigned identity in the room (unique userName + base displayName).
+  // Lets the client key itself by the unique name while showing the base name.
+  user: User;
 
   users: Array<{ user: User; progress: number }>;
 }

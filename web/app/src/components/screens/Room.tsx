@@ -62,16 +62,15 @@ export const RoomScreen = () => {
       </SegmentedControls>
       <MatchesList ref={matchesEl}>
         {room.matches &&
-          room.matches
+          [...room.matches]
             .sort((a, b) =>
               matchOrder === "mostLikes"
                 ? b.users.length - a.users.length
-                : b.matchedAt - a.matchedAt
+                : a.matchedAt - b.matchedAt
             )
             .map((match) => (
               <Card
                 media={match.media}
-                href={match.media.linkUrl}
                 key={match.media.id}
                 title={
                   <Tr

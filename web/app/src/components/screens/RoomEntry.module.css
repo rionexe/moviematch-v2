@@ -1,11 +1,47 @@
 .form {
   display: flex;
   flex-direction: column;
+  align-items: center;
   margin-top: var(--s5);
   width: 100%;
-  flex-grow: 1;
   max-width: 35rem;
   align-self: center;
+}
+
+/* V1 glass frame around the login fields (style.css .login-form): a translucent
+   blurred panel with a soft rim and drop shadow that lifts the form off the
+   gradient. The mode-toggle sits above this card, matching the main design. */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  width: 100%;
+  margin-top: var(--s4);
+  padding: var(--s4);
+  background: var(--mm-glass-bg);
+  border: 1px solid var(--mm-glass-border);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+/* Single centred call-to-action, matching main's full-width-on-mobile,
+   fixed-width-on-desktop submit button. */
+.submitRow {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--s4);
+}
+
+.submitRow button {
+  width: 100%;
+}
+
+@media screen and (min-width: 48em) {
+  .submitRow button {
+    width: auto;
+  }
 }
 
 .filters {

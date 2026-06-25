@@ -5,45 +5,65 @@
   align-items: center;
 }
 
+/* Horizontal cover-flow carousel: a single row of glass poster panels that scroll
+   left/right and snap the focused poster to the centre. Used at every width — on PC
+   this replaces the old wrapping grid that scrolled vertically (up/down). */
 .list {
   --card-height: 28rem;
-  scroll-snap-type: x mandatory;
   display: flex;
   position: relative;
   list-style: none;
-  /* 100% (not 100vw) so the carousel respects the container width and the
-     scrollbar — 100vw overflowed past the scrollbar and shifted it sideways. */
   width: 100%;
   gap: var(--s4);
-  overflow: auto;
-  padding: var(--s4) 0 var(--s3) 10vw;
-}
-
-.list::after {
-  content: "";
-  flex: 0 0 calc(10vw - var(--s4));
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  padding-block: var(--s5) var(--s4);
+  /* Symmetric side padding so the first and last posters can scroll to the centre.
+     Half a poster is card-height * 0.6666 / 2, plus the glass-frame padding (s2). */
+  padding-inline: calc(50% - var(--card-height) * 0.3333 - var(--s2));
+  scroll-padding-inline: calc(50% - var(--card-height) * 0.3333 - var(--s2));
 }
 
 @media screen and (min-width: 64em) {
-  .matches {
-    place-self: center;
-  }
-
   .list {
-    --card-height: 25rem;
-    max-width: 75rem;
-    scroll-snap-type: none;
-    display: grid;
-    padding: var(--s4);
-    grid-template-columns: repeat(auto-fill, calc(var(--card-height) * 0.6666));
-    place-content: center;
+    --card-height: 26rem;
   }
 }
 
+/* Each poster sits in a translucent blurred glass panel. Scoped to the matches list
+   (the <li>) so the swipe deck — which reuses Card — is left untouched. */
 .item {
-  scroll-snap-align: start;
-  scroll-margin-left: 10vw;
-  scroll-snap-margin-left: 10vw;
+  scroll-snap-align: center;
+  flex: 0 0 auto;
+  padding: var(--s2);
+  background: var(--mm-glass-bg);
+  background-image: var(--mm-glass-sheen);
+  border: 1px solid var(--mm-glass-border);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+/* Side panels recede (smaller + dimmed); the centred one is full size and bright.
+   Gated on no-preference so reduced-motion users get a static, still-scrollable row. */
+@media (prefers-reduced-motion: no-preference) {
+  .item {
+    transform: scale(0.86);
+    filter: brightness(0.65);
+    opacity: 0.9;
+    transition:
+      transform 160ms ease,
+      filter 160ms ease,
+      opacity 160ms ease;
+  }
+
+  .centered {
+    transform: scale(1);
+    filter: none;
+    opacity: 1;
+  }
 }
 
 .noMatchesText {

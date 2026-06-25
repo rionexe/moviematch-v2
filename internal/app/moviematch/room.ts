@@ -37,6 +37,10 @@ export class Room {
   roomName: string;
   password?: string;
   users = new Map<string, Client>();
+  // Unique room key -> base (display) name, so two people sharing a name keep
+  // distinct keys internally while the UI shows the same name. Kept after a user
+  // leaves so historical match likers still resolve to a name.
+  displayNames = new Map<string, string>();
   filters?: Filter[];
   options?: RoomOption[];
   sort: RoomSort;
@@ -92,6 +96,22 @@ export class Room {
     );
   });
 
+  // Pick a unique room key for a base name: "John", then "John2", "John3", …
+  // Checks both live members and past keys so a returning name can't collide with
+  // a prior member's ratings.
+  uniqueUserName = (base: string): string => {
+    const taken = (name: string) =>
+      this.users.has(name) || this.displayNames.has(name);
+    if (!taken(base)) return base;
+    let n = 2;
+    while (taken(`${base}${n}`)) n++;
+    return `${base}${n}`;
+  };
+
+  // Map internal unique keys back to base display names (numbers hidden).
+  toDisplayNames = (keys: string[]): string[] =>
+    keys.map((key) => this.displayNames.get(key) ?? key);
+
   getMediaForUser = async (userName: string): Promise<Media[]> => {
     const media = await this.media;
     return [...media.values()].filter((media) => {
@@ -121,7 +141,7 @@ export class Room {
           this.notifyMatch({
             matchedAt,
             media,
-            users: likes.map(([userName]) => userName),
+            users: this.toDisplayNames(likes.map(([userName]) => userName)),
           });
         }
       }
@@ -155,7 +175,7 @@ export class Room {
           matches.push({
             matchedAt,
             media,
-            users: likes.map(([userName]) => userName),
+            users: this.toDisplayNames(likes.map(([userName]) => userName)),
           });
         } else {
           log.info(
@@ -235,7 +255,6 @@ export const createRoom = async (
 };
 
 export const getRoom = (
-  userName: string,
   { roomName, password }: JoinRoomRequest,
 ): Room => {
   const room = rooms.get(roomName);
@@ -252,11 +271,7 @@ export const getRoom = (
     }
   }
 
-  if (room.users.has(userName)) {
-    throw new UserAlreadyJoinedError(
-      `${userName} is already logged into ${room.roomName} room`,
-    );
-  }
-
+  // No same-name rejection: duplicate names are made unique on join (see
+  // Room.uniqueUserName), so two people sharing a name can both be in the room.
   return room;
 };

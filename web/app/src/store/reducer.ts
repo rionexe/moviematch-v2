@@ -81,6 +81,9 @@ export const reducer: Reducer<Store, Actions> = (
           ...state,
           route: "room",
           error: undefined,
+          // Adopt the room-assigned identity (unique userName + base displayName)
+          // so our own user keys by the unique name but still shows the base name.
+          user: action.payload.user,
           room: {
             ...state.room,
             joined: true,

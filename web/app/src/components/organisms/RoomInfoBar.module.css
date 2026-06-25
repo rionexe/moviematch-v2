@@ -56,44 +56,6 @@
   top: var(--s2);
 }
 
-.occupancyButton {
-  background: none;
-  border: none;
-  color: inherit;
-  font: inherit;
-  font-size: 0.8rem;
-  opacity: 0.8;
-  cursor: pointer;
-  padding: 0 var(--s2);
-  white-space: nowrap;
-}
-
-.occupancyButton:hover {
-  opacity: 1;
-}
-
-.userList {
-  list-style: none;
-  padding: var(--s2) var(--s3);
-  margin: 0;
-  background-color: var(--mm-brand-dark);
-  opacity: 0.9;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s2) var(--s4);
-}
-
-.userItem {
-  display: flex;
-  gap: var(--s2);
-  font-size: 0.8rem;
-  color: hsl(var(--mm-red-hue), 5%, 75%);
-}
-
-.userProgress {
-  opacity: 0.6;
-}
-
 @media screen and (min-width: 52em) {
   .infoBar {
     width: 52rem;

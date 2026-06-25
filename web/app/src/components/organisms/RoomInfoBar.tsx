@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Tr } from "../atoms/Tr";
 
 import styles from "./RoomInfoBar.module.css";
@@ -8,8 +8,6 @@ import { ShareMenu } from "../molecules/ShareMenu";
 
 export const RoomInfoBar = () => {
   const [store] = useStore(["room"]);
-  const [showUsers, setShowUsers] = useState(false);
-  const users = store.room?.users ?? [];
 
   return (
     <div className={styles.infoBarWrapper}>
@@ -26,28 +24,9 @@ export const RoomInfoBar = () => {
           </p>
         </div>
         <div className={styles.itemEnd}>
-          <button
-            className={styles.occupancyButton}
-            onClick={() => setShowUsers((v) => !v)}
-            aria-expanded={showUsers}
-          >
-            {users.length} in room
-          </button>
           <ShareMenu />
         </div>
       </div>
-      {showUsers && users.length > 0 && (
-        <ul className={styles.userList}>
-          {users.map(({ user, progress }) => (
-            <li key={user.userName} className={styles.userItem}>
-              <span>{user.userName}</span>
-              <span className={styles.userProgress}>
-                {Math.round(progress * 100)}%
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 };

@@ -38,6 +38,9 @@ export class Client {
   ctx: RouteContext;
   room?: Room;
   anonymousUserName?: string;
+  // Unique key within the current room (e.g. "John" or "John2"). The base name
+  // stays in anonymousUserName / plexUser.username and is shown to users.
+  roomUserName?: string;
   plexUser?: PlexUser;
   isLoggedIn: boolean;
   locale?: Locale;
@@ -145,13 +148,20 @@ export class Client {
     }
   }
 
+  // The room key: the unique name once in a room, otherwise the base name.
   getUsername() {
+    return this.roomUserName ?? this.anonymousUserName ?? this.plexUser?.username;
+  }
+
+  // The base name the person entered / their Plex username — what the UI shows.
+  private displayName() {
     return this.anonymousUserName ?? this.plexUser?.username;
   }
 
   getUser(): User {
     return {
       userName: this.getUsername()!,
+      displayName: this.displayName(),
       avatarImage: this.plexUser?.thumb,
     };
   }
@@ -226,6 +236,7 @@ export class Client {
 
       this.isLoggedIn = false;
       delete this.anonymousUserName;
+      delete this.roomUserName;
       delete this.plexUser;
 
       this.sendMessage({ type: "logoutSuccess" });
@@ -245,9 +256,9 @@ export class Client {
       `Handling room creation event: ${JSON.stringify(createRoomReq)}`,
     );
 
-    const userName = this.getUsername();
+    const baseName = this.displayName();
 
-    if (!userName) {
+    if (!baseName) {
       return this.sendMessage({
         type: "createRoomError",
         payload: {
@@ -259,12 +270,16 @@ export class Client {
 
     try {
       this.room = await createRoom(createRoomReq, this.ctx);
+      const userName = this.room.uniqueUserName(baseName);
+      this.roomUserName = userName;
       this.room.users.set(userName, this);
+      this.room.displayNames.set(userName, baseName);
       this.sendMessage({
         type: "createRoomSuccess",
         payload: {
+          user: this.getUser(),
           previousMatches: await this.room.getMatches(
-            userName!,
+            userName,
             false,
           ),
           media: await this.room.getMediaForUser(userName),
@@ -296,28 +311,32 @@ export class Client {
     }
 
     try {
-      // TODO: Actually think about how usernames are associated with room.users and
-      // avoid conflicts between anonymous users and Plex users.
-      const userName = this.getUsername();
+      const baseName = this.displayName();
 
-      if (!userName) {
+      if (!baseName) {
         throw new Error("No username despite logged in status.");
       }
 
-      this.room = getRoom(userName, joinRoomReq);
+      this.room = getRoom(joinRoomReq);
+      // Make the name unique within the room so two people sharing a name can
+      // both join; the base name is what everyone sees.
+      const userName = this.room.uniqueUserName(baseName);
+      this.roomUserName = userName;
       this.room.users.set(userName, this);
+      this.room.displayNames.set(userName, baseName);
       this.sendMessage({
         type: "joinRoomSuccess",
         payload: {
+          user: this.getUser(),
           previousMatches: await this.room.getMatches(
-            userName!,
+            userName,
             false,
           ),
           media: await this.room.getMediaForUser(userName),
           users: await this.room.getUsers(),
         },
       });
-      const userProgress = this.room.userProgress.get(this.getUsername()!) ?? 0;
+      const userProgress = this.room.userProgress.get(userName) ?? 0;
       const mediaSize = (await this.room.media).size;
 
       this.room.notifyJoin({
@@ -356,13 +375,17 @@ export class Client {
 
     const userName = this.getUsername();
     if (this.room && userName) {
+      // Capture the in-room identity (unique key) before clearing it, so the
+      // leave broadcast removes the right entry from everyone's user list.
+      const user = this.getUser();
       this.room.users.delete(userName);
+      delete this.roomUserName;
 
       this.sendMessage({
         type: "leaveRoomSuccess",
       });
 
-      this.room.notifyLeave(this.getUser());
+      this.room.notifyLeave(user);
     } else {
       return this.sendMessage({
         type: "leaveRoomError",

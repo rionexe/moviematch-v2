@@ -28,13 +28,27 @@ interface CardStackProps {
 type Spring = {
   x: number;
   y: number;
-  z: number;
   opacity: number;
+  brightness: number;
 };
 
 const INITIAL_COUNT = 5;
-const YZ_SIZE = 15;
-const YZ_OFFSET = -30;
+// Cards behind the front one cascade up-and-left off its top-left corner — a
+// straight diagonal offset with no rotation (so it doesn't fan like a hand of cards).
+const FAN_X = 26; // px left per card behind the front
+const FAN_Y = 20; // px up per card behind the front
+// Upcoming cards stay opaque but get progressively darker, so each looks shadowed
+// by the card in front of it.
+const DARK_STEP = 0.2; // brightness lost per card behind the front
+const MIN_BRIGHTNESS = 0.35;
+
+// Resting transform for a card `depth` steps behind the front (0 = front card).
+const restSpring = (depth: number): Spring => ({
+  x: -depth * FAN_X,
+  y: -depth * FAN_Y,
+  opacity: 1,
+  brightness: Math.max(MIN_BRIGHTNESS, 1 - depth * DARK_STEP),
+});
 
 interface StackItem<T> {
   id: string;
@@ -93,11 +107,13 @@ export const CardStack = memo(
               return { items, index };
             }
             const [newCard] = cards.slice(index, newIndex);
+            // New card enters at the back (index 0); it fades in from opacity 0 and
+            // the rest loop below animates it to its fanned resting position.
             const controller = new Controller<Spring>({
               x: 0,
-              y: YZ_OFFSET,
-              z: YZ_OFFSET,
+              y: 0,
               opacity: 0,
+              brightness: 1,
             });
             newItems = [
               {
@@ -109,8 +125,6 @@ export const CardStack = memo(
               },
               ...items.map((item) => ({ ...item, index: item.index + 1 })),
             ];
-
-            controller.start({ opacity: 1 });
             break;
           }
           case "remove": {
@@ -118,21 +132,24 @@ export const CardStack = memo(
             if (item && !item.removed) {
               const itemIndex = items.indexOf(item);
 
-              if (item.controller.springs.x.idle) {
-                item.controller
-                  .start({
-                    x: (action.payload.direction === "left" ? -1 : 1) *
-                      (vw + ew),
-                    config: { duration: 150 },
-                  })
-                  .then(() => {
-                    dispatch({
-                      type: "finalizeRemove",
-                      payload: { id: action.payload.id },
-                    });
-                    onCardDismissed(item.item, action.payload.direction);
+              // Always fly the card off. (We previously gated this on the card's
+              // x-spring being idle, which silently dropped a rate when the user
+              // rated before the incoming front card finished settling into place
+              // — making the next card feel "stuck". The `!item.removed` check
+              // above already prevents removing the same card twice.)
+              item.controller
+                .start({
+                  x: (action.payload.direction === "left" ? -1 : 1) *
+                    (vw + ew),
+                  config: { duration: 150 },
+                })
+                .then(() => {
+                  dispatch({
+                    type: "finalizeRemove",
+                    payload: { id: action.payload.id },
                   });
-              }
+                  onCardDismissed(item.item, action.payload.direction);
+                });
 
               newItems = items.map((item, i) =>
                 item.id === action.payload.id ? { ...item, removed: true } : {
@@ -151,11 +168,13 @@ export const CardStack = memo(
           }
         }
 
-        for (const item of newItems) {
-          item.controller.start({
-            y: YZ_SIZE * item.index + YZ_OFFSET,
-            z: YZ_SIZE * item.index + YZ_OFFSET,
-          });
+        // Recompute resting positions for live cards only. A card being swiped
+        // off (removed but still animating) must keep flying out and must not
+        // skew the depth of the card now coming to the front.
+        const liveItems = newItems.filter((it) => !it.removed);
+        const maxIndex = liveItems.reduce((m, it) => Math.max(m, it.index), 0);
+        for (const item of liveItems) {
+          item.controller.start(restSpring(maxIndex - item.index));
         }
 
         return { index: newIndex, items: newItems };
@@ -165,12 +184,9 @@ export const CardStack = memo(
           id: card.id,
           index: i,
           item: card,
-          controller: new Controller<Spring>({
-            x: 0,
-            y: i * YZ_SIZE + YZ_OFFSET,
-            z: i * YZ_SIZE + YZ_OFFSET,
-            opacity: 1,
-          }),
+          controller: new Controller<Spring>(
+            restSpring(INITIAL_COUNT - 1 - i),
+          ),
           removed: false,
         })),
         index: INITIAL_COUNT,
@@ -212,24 +228,14 @@ export const CardStack = memo(
     const bind = useGesture(
       {
         onDrag({ args: [id], down, delta: [x], movement: [mx] }) {
-          console.log(id, down, x, mx);
           if (down && connectionStatus === "connected") {
             const p = abs(mx / (vw + ew));
-            let isAfterId = false;
-            items.forEach(({ removed, index, id: _id, controller }) => {
-              if (!removed) {
-                if (id === _id) {
-                  controller.set({
-                    x: (controller.springs as any).x.get() + x,
-                    opacity: 1 - p,
-                  });
-                  isAfterId = true;
-                } else {
-                  const yz = p * (isAfterId ? -YZ_SIZE : YZ_SIZE) +
-                    index * YZ_SIZE +
-                    YZ_OFFSET;
-                  controller.set({ y: yz, z: yz });
-                }
+            items.forEach(({ removed, id: _id, controller }) => {
+              if (!removed && id === _id) {
+                controller.set({
+                  x: (controller.springs as any).x.get() + x,
+                  opacity: 1 - p,
+                });
               }
             });
           }
@@ -249,27 +255,25 @@ export const CardStack = memo(
             });
             dispatch({ type: "add" });
           } else {
-            items.forEach(({ removed, index, id: _id, controller }) => {
-              if (!removed) {
-                if (id === _id) {
-                  controller.start({ x: 0, opacity: 1 });
-                } else {
-                  const yz = index * YZ_SIZE + YZ_OFFSET;
-                  controller.start({
-                    y: yz,
-                    z: yz,
-                    config: { duration: 50, velocity: 1000 },
-                  });
-                }
+            // Not a swipe — snap the front card back to its resting position.
+            items.forEach(({ removed, id: _id, controller }) => {
+              if (!removed && id === _id) {
+                controller.start(restSpring(0));
               }
             });
           }
         },
       },
-      { drag: { axis: "x" } },
+      // filterTaps lets a tap fall through as a click (Card flips) while a drag swipes.
+      { drag: { axis: "x", filterTaps: true } },
     );
 
     const isEmpty = items.length === 0;
+    // Highest index among live cards = the front card the user interacts with.
+    const frontIndex = items.reduce(
+      (max, it) => (!it.removed && it.index > max ? it.index : max),
+      -1,
+    );
 
     return (
       <>
@@ -296,17 +300,24 @@ export const CardStack = memo(
             </>
           )}
           {items.map((item) => {
-            const { x, y, z, opacity } = item.controller.springs;
+            const { x, y, opacity, brightness } = item.controller.springs;
+            // The front card is the live (non-removed) one with the highest index.
+            // We mark it explicitly rather than via CSS :last-of-type, because a
+            // card being swiped off stays at the end of the array until its removal
+            // is finalized — so :last-of-type would point at the flying-off card and
+            // leave the real front card non-interactive ("stuck").
+            const isFront = !item.removed && item.index === frontIndex;
             return (
               <animated.div
                 key={item.id}
                 data-index={item.index}
-                className={styles.item}
+                data-front={isFront ? "true" : undefined}
+                className={`${styles.item} ${isFront ? styles.itemFront : ""}`}
                 style={{
                   x,
                   y,
-                  z,
-                  opacity: opacity.to([0.1, 0.8, 1], [0, 1, 1]),
+                  opacity,
+                  filter: brightness.to((b) => `brightness(${b})`),
                 }}
                 {...bind(item.id)}
               >
