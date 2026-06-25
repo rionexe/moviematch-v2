@@ -4,9 +4,9 @@ import type { Media } from "../../../../../types/moviematch";
 import { ContentRatingSymbol } from "../icons/ContentRatingSymbol";
 import { StarIcon } from "../icons/StarIcon";
 import { Pill } from "../atoms/Pill";
+import { PlexIcon } from "../icons/PlexIcon";
 
 import styles from "./Card.module.css";
-import { ShareIcon } from "../icons/ShareIcon";
 
 export interface CardProps {
   title?: ReactNode;
@@ -69,17 +69,22 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
                 </Pill>
               )}
               {media.genres.map((genre) => <Pill key={genre}>{genre}</Pill>)}
-              {/* Stop the click bubbling to the card so opening Plex doesn't flip it back */}
-              <span onClick={(e) => e.stopPropagation()}>
-                <Pill href={media.linkUrl}>
-                  <span>Open in Plex</span>
-                  <ShareIcon />
-                </Pill>
-              </span>
             </div>
             <p className={styles.moreInfoDescription}>
               {media.description}
             </p>
+            {/* Plex badge — bottom-right corner, stops propagation so click
+                doesn't flip the card back to the poster */}
+            <a
+              href={media.linkUrl}
+              className={styles.plexButton}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              aria-label="Open in Plex"
+            >
+              <PlexIcon />
+            </a>
           </div>
         )}
       </div>
