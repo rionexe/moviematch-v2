@@ -1,0 +1,117 @@
+.wrapper {
+  position: relative;
+}
+
+.hiddenNative {
+  display: none;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 3rem;
+  padding: var(--s2) 2.25rem var(--s2) var(--s2);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--s1);
+  color: var(--mm-cream);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  position: relative;
+  transition: border-color 120ms, background 120ms;
+}
+
+.trigger:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Sage-green chevron — rotates 180° when open */
+.trigger::after {
+  content: "";
+  position: absolute;
+  right: var(--s2);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 8px;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%234f7a57' stroke-width='2' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: contain;
+  transition: transform 150ms ease;
+}
+
+.triggerOpen::after {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.triggerLabel {
+  flex: 0 0 auto;
+}
+
+.triggerHint {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: rgba(244, 239, 225, 0.45);
+  padding-left: var(--s2);
+}
+
+.triggerPlaceholder {
+  color: rgba(244, 239, 225, 0.4);
+}
+
+/* Glass dropdown panel */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  list-style: none;
+  padding: var(--s1) 0;
+  margin: 0;
+  background: rgba(20, 13, 32, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--s1);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  padding: 0.4rem var(--s2);
+  cursor: pointer;
+  gap: var(--s2);
+}
+
+.option:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.optionSelected {
+  background: rgba(79, 122, 87, 0.22);
+}
+
+/* Number / primary label — full cream weight */
+.optionLabel {
+  color: var(--mm-cream);
+  font-size: 0.95rem;
+  font-weight: 500;
+  min-width: 2ch;
+}
+
+/* MPA rating — pushed to the right, noticeably faded */
+.optionHint {
+  margin-left: auto;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: rgba(244, 239, 225, 0.38);
+  letter-spacing: 0.02em;
+}

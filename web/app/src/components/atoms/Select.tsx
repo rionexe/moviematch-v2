@@ -1,6 +1,5 @@
 import React from "react";
-
-import styles from "./Select.module.css";
+import { GlassSelect } from "./GlassSelect";
 
 interface SelectProps<Value extends string = string> {
   name: string;
@@ -12,30 +11,24 @@ interface SelectProps<Value extends string = string> {
 
 export const Select = ({
   name,
-  value = "",
+  value = "" as any,
   options,
   onChange,
   onBlur,
 }: SelectProps) => (
-  <div className={styles.selectWrapper}>
-    <select
-      className={styles.select}
-      name={name}
-      onChange={onChange}
-      onBlur={onBlur}
-      value={value}
-      data-test-handle={`${name}-select-input`}
-    >
-      <option value="">&mdash; Select &mdash;</option>
-      {options &&
-        Object.entries(options).map(([optionValue, label]) => (
-          <option
-            value={optionValue}
-            key={optionValue}
-          >
-            {label}
-          </option>
-        ))}
-    </select>
-  </div>
+  <GlassSelect
+    name={name}
+    value={value}
+    options={Object.entries(options).map(([v, label]) => ({
+      value: v,
+      label: label as string,
+    }))}
+    testHandle={`${name}-select-input`}
+    onChange={(newValue) => {
+      onChange?.({ target: { value: newValue } } as React.ChangeEvent<HTMLSelectElement>);
+    }}
+    onBlur={() => {
+      onBlur?.({} as React.FocusEvent<HTMLSelectElement>);
+    }}
+  />
 );

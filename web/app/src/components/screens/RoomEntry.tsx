@@ -13,10 +13,11 @@ import {
 import { Layout } from "../layout/Layout";
 import { Tr } from "../atoms/Tr";
 
+import { GlassSelect, GlassOption } from "../atoms/GlassSelect";
 import styles from "./RoomEntry.module.css";
 
-// Matches V1's fillAgeOptions: every integer 3–18 with named hints at the key
-// US rating thresholds (mirrors the server's RATING_TABLE in rating_age.ts).
+// Every integer 3–18, mirroring V1's fillAgeOptions. Hint column shows the
+// MPA / TV rating so the number stays the primary focus of each row.
 const AGE_HINTS: Record<number, string> = {
   6: "G",
   10: "PG · TV-PG",
@@ -25,10 +26,15 @@ const AGE_HINTS: Record<number, string> = {
   17: "R",
   18: "NC-17",
 };
-const AGE_OPTIONS = Array.from({ length: 16 }, (_, i) => i + 3).map((age) => ({
-  value: age,
-  label: AGE_HINTS[age] ? `${age}  ·  ${AGE_HINTS[age]}` : String(age),
+const AGE_OPTIONS: GlassOption[] = Array.from(
+  { length: 16 },
+  (_, i) => i + 3,
+).map((age) => ({
+  value: String(age),
+  label: String(age),
+  hint: AGE_HINTS[age],
 }));
+const AGE_OPTIONS_DESC = [...AGE_OPTIONS].reverse();
 
 type Mode = "join" | "create";
 
@@ -189,36 +195,24 @@ export const RoomEntryScreen = () => {
               <div className={styles.ageFilters}>
                 <label className={styles.ageLabel}>
                   Min age
-                  <select
-                    className={styles.ageSelect}
-                    value={minAge ?? ""}
-                    onChange={(e) =>
-                      setMinAge(
-                        e.target.value ? Number(e.target.value) : undefined,
-                      )}
-                  >
-                    <option value="">Any</option>
-                    {AGE_OPTIONS.map((o) => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </select>
+                  <GlassSelect
+                    name="minAge"
+                    value={minAge !== undefined ? String(minAge) : ""}
+                    options={AGE_OPTIONS}
+                    placeholder="Any"
+                    onChange={(v) => setMinAge(v ? Number(v) : undefined)}
+                  />
                 </label>
 
                 <label className={styles.ageLabel}>
                   Max age
-                  <select
-                    className={styles.ageSelect}
-                    value={maxAge ?? ""}
-                    onChange={(e) =>
-                      setMaxAge(
-                        e.target.value ? Number(e.target.value) : undefined,
-                      )}
-                  >
-                    <option value="">Any</option>
-                    {[...AGE_OPTIONS].reverse().map((o) => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </select>
+                  <GlassSelect
+                    name="maxAge"
+                    value={maxAge !== undefined ? String(maxAge) : ""}
+                    options={AGE_OPTIONS_DESC}
+                    placeholder="Any"
+                    onChange={(v) => setMaxAge(v ? Number(v) : undefined)}
+                  />
                 </label>
 
                 <label className={styles.unratedLabel}>
