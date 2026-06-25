@@ -1,21 +1,54 @@
-.shareButton {
+.copyButton {
+  position: relative;
   background: transparent;
   border: none;
   color: currentColor;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.2em;
   cursor: pointer;
   padding: 0;
+  font: inherit;
+  font-weight: 600;
 }
 
-.roomName {
-  display: none;
-  margin-right: var(--s1);
+.label {
+  white-space: nowrap;
 }
 
-@media screen and (min-width: 26.5em) {
-  .roomName {
-    display: block;
-  }
+.code {
+  letter-spacing: 0.06em;
+}
+
+/* The copy icon sits like a trademark symbol — inline near the text baseline. */
+.copyButton svg {
+  align-self: flex-start;
+  margin-top: 0.05em;
+  opacity: 0.7;
+  transition: opacity 120ms;
+}
+
+.copyButton:hover svg {
+  opacity: 1;
+}
+
+/* CSS tooltip — appears below the button on hover. */
+.tooltip {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: rgba(0, 0, 0, 0.82);
+  color: #f4efe1;
+  font-size: 0.72rem;
+  font-weight: 400;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms;
+}
+
+.copyButton:hover .tooltip {
+  opacity: 1;
 }

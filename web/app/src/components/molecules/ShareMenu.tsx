@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch } from "react-redux";
 import { Dispatch, useStore } from "../../store";
-import { ShareIcon } from "../icons/ShareIcon";
+import { CopyIcon } from "../icons/CopyIcon";
 
 import styles from "./ShareMenu.module.css";
 
@@ -34,7 +34,7 @@ export const ShareMenu = () => {
     }
   };
 
-  const handleShare = async () => {
+  const handleCopy = async () => {
     try {
       await copyText(room.name ?? "");
       dispatch({
@@ -60,9 +60,13 @@ export const ShareMenu = () => {
   };
 
   return (
-    <button className={styles.shareButton} onClick={handleShare}>
-      <span className={styles.roomName}>{room.name}</span>
-      <ShareIcon size="1.4rem" />
+    <button className={styles.copyButton} onClick={handleCopy}>
+      <span className={styles.label}>
+        Room ID:{" "}
+        <span className={styles.code}>{room.name}</span>
+      </span>
+      <CopyIcon size="0.75em" />
+      <span className={styles.tooltip} aria-hidden="true">Click to copy</span>
     </button>
   );
 };

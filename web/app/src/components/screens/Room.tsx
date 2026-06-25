@@ -18,7 +18,7 @@ import { useStore } from "../../store";
 export const RoomScreen = () => {
   const [{ room }, dispatch] = useStore(["room"]);
   const matchesEl = useRef<HTMLUListElement>(null);
-  const [matchOrder, setMatchOrder] = useState<string>("mostRecent");
+  const [matchOrder, setMatchOrder] = useState<string>("all");
   const [media] = useState(room?.media);
 
   if (!room || !media) {
@@ -53,22 +53,27 @@ export const RoomScreen = () => {
         }}
         paddingTop="s4"
       >
-        <SegmentedControlOption value="mostRecent">
-          Most Recent
+        <SegmentedControlOption value="all">
+          All
         </SegmentedControlOption>
-        <SegmentedControlOption value="mostLikes">
-          Most Likes
+        <SegmentedControlOption value="mostLiked">
+          Most Liked
         </SegmentedControlOption>
       </SegmentedControls>
       <MatchesList ref={matchesEl}>
         {room.matches &&
-          [...room.matches]
-            .sort((a, b) =>
-              matchOrder === "mostLikes"
-                ? b.users.length - a.users.length
-                : a.matchedAt - b.matchedAt
-            )
-            .map((match) => (
+          (() => {
+            const byAge = [...room.matches].sort(
+              (a, b) => a.matchedAt - b.matchedAt,
+            );
+            const list =
+              matchOrder === "mostLiked"
+                ? (() => {
+                    const max = Math.max(...byAge.map((m) => m.users.length));
+                    return byAge.filter((m) => m.users.length === max);
+                  })()
+                : byAge;
+            return list.map((match) => (
               <Card
                 media={match.media}
                 key={match.media.id}
@@ -82,7 +87,8 @@ export const RoomScreen = () => {
                   />
                 }
               />
-            ))}
+            ));
+          })()}
       </MatchesList>
       <Version />
     </Layout>

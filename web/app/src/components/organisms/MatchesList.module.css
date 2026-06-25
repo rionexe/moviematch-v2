@@ -3,6 +3,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
 }
 
 /* Horizontal cover-flow carousel: a single row of glass poster panels that scroll
@@ -19,10 +20,12 @@
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
   padding-block: var(--s5) var(--s4);
-  /* Symmetric side padding so the first and last posters can scroll to the centre.
-     Half a poster is card-height * 0.6666 / 2, plus the glass-frame padding (s2). */
-  padding-inline: calc(50% - var(--card-height) * 0.3333 - var(--s2));
-  scroll-padding-inline: calc(50% - var(--card-height) * 0.3333 - var(--s2));
+  /* Asymmetric: start edge is small so scrollLeft=0 shows the first card at the
+     left. End edge is large so the last card can still be scrolled to centre. */
+  padding-inline-start: var(--s5);
+  padding-inline-end: calc(50% - var(--card-height) * 0.3333 - var(--s2));
+  scroll-padding-inline-start: var(--s5);
+  scroll-padding-inline-end: calc(50% - var(--card-height) * 0.3333 - var(--s2));
 }
 
 @media screen and (min-width: 64em) {
