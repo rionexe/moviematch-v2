@@ -58,30 +58,34 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  border: none;
-  background-color: var(--mm-add-color);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
   font-size: 4rem;
   border-radius: 2rem;
   cursor: pointer;
-  transition: background-color 200ms ease-in-out;
+  transition: background 200ms ease-in-out, border-color 200ms ease-in-out;
 }
 
 @media (hover: hover) {
   .control:hover {
-    background-color: var(--mm-add-highlight-color);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.35);
   }
 }
 
 .dislikeButton {
   composes: control;
-  --strokeColor: var(--mm-failure-color);
+  --strokeColor: hsl(360, 70%, 65%);
   left: calc(50% - (var(--card-width) + 23rem) / 2);
 }
 
 .likeButton {
   composes: control;
-  --fillColor: hsl(112, 80%, 30%);
-  --strokeColor: transparent;
+  --fillColor: #e05468;
+  --strokeColor: #e05468;
   right: calc(50% - (var(--card-width) + 23rem) / 2);
 }
 
