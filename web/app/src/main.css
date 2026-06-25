@@ -101,6 +101,28 @@ body {
   font-family: system-ui;
   overscroll-behavior: none;
   scroll-behavior: smooth;
+  scrollbar-color: var(--mm-brand) rgba(255, 255, 255, 0.06);
+  scrollbar-width: thin;
+}
+
+/* Chromium/Edge scrollbar theming */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--mm-brand);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--mm-brand-light);
 }
 
 body:not(.show-focus-ring) *:focus {

@@ -15,16 +15,20 @@ import { Tr } from "../atoms/Tr";
 
 import styles from "./RoomEntry.module.css";
 
-const AGE_OPTIONS = [
-  { value: 2, label: "2 · TV-Y" },
-  { value: 6, label: "6 · G · TV-G" },
-  { value: 7, label: "7 · TV-Y7" },
-  { value: 10, label: "10 · PG · TV-PG" },
-  { value: 13, label: "13 · PG-13" },
-  { value: 14, label: "14 · TV-14" },
-  { value: 17, label: "17 · R · TV-MA" },
-  { value: 18, label: "18 · NC-17" },
-];
+// Matches V1's fillAgeOptions: every integer 3–18 with named hints at the key
+// US rating thresholds (mirrors the server's RATING_TABLE in rating_age.ts).
+const AGE_HINTS: Record<number, string> = {
+  6: "G",
+  10: "PG · TV-PG",
+  13: "PG-13",
+  14: "TV-14",
+  17: "R",
+  18: "NC-17",
+};
+const AGE_OPTIONS = Array.from({ length: 16 }, (_, i) => i + 3).map((age) => ({
+  value: age,
+  label: AGE_HINTS[age] ? `${age}  ·  ${AGE_HINTS[age]}` : String(age),
+}));
 
 type Mode = "join" | "create";
 
