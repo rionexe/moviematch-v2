@@ -6,6 +6,8 @@
   width: 100%;
   max-width: 35rem;
   align-self: center;
+  /* Widen the Create/Join segmented buttons beyond the default s1 inline padding */
+  --sc-item-padding-inline: calc(var(--s1) + 5px);
 }
 
 /* V1 glass frame around the login fields (style.css .login-form): a translucent
@@ -68,6 +70,8 @@
   gap: var(--s1);
   font-size: 0.875rem;
   color: rgba(244, 239, 225, 0.7);
+  flex: 1;
+  min-width: 0;
 }
 
 

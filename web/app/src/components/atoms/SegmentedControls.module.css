@@ -76,7 +76,7 @@
 }
 
 .itemPadding {
-  padding: var(--s2) var(--s1);
+  padding: var(--s2) var(--sc-item-padding-inline, var(--s1));
 }
 
 /* Active segment borrows the primary button's sheen + rim so it reads as the
