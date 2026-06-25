@@ -20,12 +20,11 @@
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
   padding-block: var(--s5) var(--s4);
-  /* Asymmetric: start edge is small so scrollLeft=0 shows the first card at the
-     left. End edge is large so the last card can still be scrolled to centre. */
-  padding-inline-start: var(--s5);
-  padding-inline-end: calc(50% - var(--card-height) * 0.3333 - var(--s2));
-  scroll-padding-inline-start: var(--s5);
-  scroll-padding-inline-end: calc(50% - var(--card-height) * 0.3333 - var(--s2));
+  /* Symmetric: places card 1's centre exactly at the snap centre when scrollLeft=0,
+     so the carousel starts at the left with card 1 highlighted. width:100% on
+     .matches (above) is what prevents the page-level horizontal scrollbar. */
+  padding-inline: calc(50% - var(--card-height) * 0.3333 - var(--s2));
+  scroll-padding-inline: calc(50% - var(--card-height) * 0.3333 - var(--s2));
 }
 
 @media screen and (min-width: 64em) {
