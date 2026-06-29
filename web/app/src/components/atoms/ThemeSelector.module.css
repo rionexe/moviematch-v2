@@ -61,7 +61,7 @@
   background: none;
   border: 1px solid transparent;
   border-radius: var(--s1);
-  color: var(--mm-white);
+  color: var(--mm-text-color);
   cursor: pointer;
   font-size: 0.8125rem;
   text-align: left;

@@ -10,6 +10,8 @@ interface Theme {
 const THEMES: Theme[] = [
   { id: "forest", label: "Forest", accent: "#4f7a57" },
   { id: "ocean", label: "Ocean", accent: "#2e8b7a" },
+  { id: "parchment", label: "Parchment", accent: "#9bad72" },
+  { id: "willow", label: "Willow", accent: "#a8c870" },
 ];
 
 const STORAGE_KEY = "mm-theme";

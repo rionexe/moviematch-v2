@@ -138,6 +138,34 @@ body {
   --mm-glass-bg: rgba(8, 18, 35, 0.65);
 }
 
+:root[data-theme="parchment"] {
+  --mm-brand: #9bad72;
+  --mm-brand-dark: #6b7d4a;
+  --mm-brand-light: #c8d0a8;
+  --mm-cream: #f3eee2;
+  --mm-bg-from: #f3eee2;
+  --mm-bg-to: #e4dcc8;
+  --mm-glass-bg: rgba(243, 238, 226, 0.65);
+  --mm-glass-border: rgba(122, 104, 85, 0.18);
+  --mm-glass-rim: rgba(255, 255, 255, 0.9);
+  --mm-glass-sheen: linear-gradient(rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+  --mm-text-color: #3a3028;
+  --mm-line-color: rgba(0, 0, 0, 0.1);
+}
+
+:root[data-theme="willow"] {
+  --mm-brand: #9bad72;
+  --mm-brand-dark: #7a9452;
+  --mm-brand-light: #a8c870;
+  --mm-cream: #ede8d5;
+  --mm-bg-from: #181b12;
+  --mm-bg-to: #202418;
+  --mm-glass-bg: rgba(24, 27, 18, 0.68);
+  --mm-glass-border: rgba(155, 173, 114, 0.18);
+  --mm-glass-rim: rgba(168, 200, 112, 0.22);
+  --mm-text-color: #ede8d5;
+}
+
 body:not(.show-focus-ring) *:focus {
   outline: none;
 }
