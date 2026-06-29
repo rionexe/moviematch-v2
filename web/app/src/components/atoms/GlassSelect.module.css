@@ -29,7 +29,7 @@
   border-color: var(--mm-glass-rim);
 }
 
-/* CSS chevron — uses --mm-brand so it follows the active theme */
+/* CSS chevron — inherits currentColor so it's always readable regardless of theme */
 .trigger::after {
   content: "";
   position: absolute;
@@ -37,8 +37,9 @@
   top: 50%;
   width: 8px;
   height: 8px;
-  border-right: 2px solid var(--mm-brand);
-  border-bottom: 2px solid var(--mm-brand);
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  opacity: 0.55;
   transform: translateY(-75%) rotate(45deg);
   transition: transform 150ms ease;
   pointer-events: none;
