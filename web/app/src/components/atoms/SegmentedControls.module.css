@@ -1,5 +1,4 @@
 :root {
-  --scTextColor: rgba(244, 239, 225, 0.7);
   --scBorderRadius: 999px;
   --scItemFontSize: 0.875rem;
   --scItemPadding: 2px 12px;
@@ -21,7 +20,7 @@
   padding: 4px;
   margin: 0;
   background: var(--mm-glass-bg);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid var(--mm-glass-border);
   border-radius: var(--scBorderRadius);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
@@ -31,7 +30,7 @@
   background-color: transparent;
   /* transparent border so the active rim doesn't shift layout between segments */
   border: 1px solid transparent;
-  color: var(--scTextColor);
+  color: var(--mm-on-glass-muted);
   text-align: center;
   list-style: none;
   border-radius: var(--scBorderRadius);
@@ -70,8 +69,8 @@
 
 @media (hover: hover) {
   .item:not(.itemSelected):hover {
-    color: var(--mm-cream);
-    background-color: rgba(255, 255, 255, 0.06);
+    color: var(--mm-on-glass);
+    background-color: rgba(128, 128, 128, 0.10);
   }
 }
 
