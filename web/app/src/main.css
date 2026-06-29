@@ -9,6 +9,7 @@
   --mm-cream: #f4efe1;
   --mm-bg-from: #1a1228;
   --mm-bg-to: #2d1b3d;
+  --mm-text-color: #f0f0f0;
 
   /* V1 glass surface tokens */
   --mm-glass-bg: rgba(22, 15, 35, 0.62);
@@ -94,7 +95,7 @@ body {
   );
   background-attachment: fixed;
   background-size: cover;
-  color: #f0f0f0;
+  color: var(--mm-text-color);
   min-height: calc(var(--vh) * 100);
   text-rendering: optimizeSpeed;
   line-height: 1.5;
@@ -123,6 +124,18 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--mm-brand-light);
+}
+
+/* ── Themes ────────────────────────────────────────────────────────────── */
+
+:root[data-theme="ocean"] {
+  --mm-brand: #2e8b7a;
+  --mm-brand-dark: #1d6b5c;
+  --mm-brand-light: #4fb5a0;
+  --mm-cream: #e8f4f2;
+  --mm-bg-from: #0a1628;
+  --mm-bg-to: #112035;
+  --mm-glass-bg: rgba(8, 18, 35, 0.65);
 }
 
 body:not(.show-focus-ring) *:focus {

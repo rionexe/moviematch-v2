@@ -8,6 +8,7 @@ import { RoomEntryScreen } from "./components/screens/RoomEntry";
 import { RoomScreen } from "./components/screens/Room";
 import { Loading } from "./components/screens/Loading";
 import { ToastList } from "./components/atoms/Toast";
+import { ThemeSelector } from "./components/atoms/ThemeSelector";
 import { ConfigScreen } from "./components/screens/Config";
 import type { Routes } from "./types";
 import { createStore, Dispatch, useSelector } from "./store";
@@ -57,6 +58,7 @@ const MovieMatch = () => {
         removeToast={(toast) =>
           dispatch({ type: "removeToast", payload: toast })}
       />
+      <ThemeSelector />
     </>
   );
 };
