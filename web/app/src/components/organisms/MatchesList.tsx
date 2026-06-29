@@ -6,18 +6,57 @@ import React, {
   useCallback,
   useEffect,
   useRef,
+  useState,
 } from "react";
 
-import { Tr } from "../atoms/Tr";
 import styles from "./MatchesList.module.css";
+
+const NO_MATCHES_MESSAGES = [
+  "No matches yet... have you tried compromising your clearly impeccable taste?",
+  "No matches yet. Maybe your standards need a reality check?",
+  "Still no matches. Have you considered that your co-watcher has feelings too?",
+  "Nothing matched so far. Perhaps try something you wouldn't normally pick?",
+  "No matches yet... the algorithm is judging both of you equally.",
+  "Zero matches. Bold choices were made. No regrets though, right?",
+  "The only thing you two have agreed on so far is 'not this one.'",
+  "At this rate, you'll still be swiping when the sequel comes out.",
+  "No matches. You've achieved something mathematically impressive here.",
+  "Have you considered lowering your standards? Start by removing them entirely.",
+  "Both of you are making bold choices. None of them are movies you'll actually watch.",
+  "This is a match app, not a speed run for who can reject the most films.",
+  "Nothing yet. A wall would be cheaper to stare at.",
+  "The movies are fine. We're just saying.",
+  "You've vetoed enough films to fill two cinema screens. Still nothing.",
+  "Not a single movie has survived contact with both of your opinions.",
+  "Your taste is either very refined or just very inconvenient. Hard to tell.",
+  "At some point a movie has to happen. We're rooting for you.",
+  "No matches. The streaming service is starting to take it personally.",
+  "Somewhere out there, a perfect film for you both exists. You've rejected it twice.",
+  "You two should probably just describe movies to each other and argue about those instead.",
+];
 
 interface MatchesListProps {
   children: ReactNode;
+  ratedCount?: number;
 }
 
+const randomMessage = () =>
+  NO_MATCHES_MESSAGES[Math.floor(Math.random() * NO_MATCHES_MESSAGES.length)];
+
+const randomInterval = () => 7 + Math.floor(Math.random() * 9);
+
 export const MatchesList = forwardRef<HTMLUListElement, MatchesListProps>(
-  ({ children }, ref) => {
+  ({ children, ratedCount = 0 }, ref) => {
     const childCount = Children.count(children);
+    const [noMatchesText, setNoMatchesText] = useState(randomMessage);
+    const nextThreshold = useRef(randomInterval());
+
+    useEffect(() => {
+      if (ratedCount >= nextThreshold.current) {
+        setNoMatchesText(randomMessage());
+        nextThreshold.current = ratedCount + randomInterval();
+      }
+    }, [ratedCount]);
 
     // Keep our own handle on the <ul> for the centre-detection scroll logic while
     // still forwarding the node to the parent (Room uses it to scrollTo on sort).
@@ -103,7 +142,7 @@ export const MatchesList = forwardRef<HTMLUListElement, MatchesListProps>(
         {childCount === 0
           ? (
             <p className={styles.noMatchesText}>
-              <Tr name="MATCHES_SECTION_NO_MATCHES" />
+              {noMatchesText}
             </p>
           )
           : (

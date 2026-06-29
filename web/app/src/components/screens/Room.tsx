@@ -20,6 +20,7 @@ export const RoomScreen = () => {
   const matchesEl = useRef<HTMLUListElement>(null);
   const [matchOrder, setMatchOrder] = useState<string>("all");
   const [media] = useState(room?.media);
+  const [ratedCount, setRatedCount] = useState(0);
 
   if (!room || !media) {
     return <ErrorMessage message="No Room!" />;
@@ -37,6 +38,7 @@ export const RoomScreen = () => {
               rating: rating === "left" ? "dislike" : "like",
             },
           });
+          setRatedCount((n) => n + 1);
         }}
         renderCard={(card) => <Card media={card} key={card.id} />}
       />
@@ -60,7 +62,7 @@ export const RoomScreen = () => {
           Most Liked
         </SegmentedControlOption>
       </SegmentedControls>
-      <MatchesList ref={matchesEl}>
+      <MatchesList ref={matchesEl} ratedCount={ratedCount}>
         {room.matches &&
           (() => {
             const byAge = [...room.matches].sort(

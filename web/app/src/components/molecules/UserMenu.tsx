@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { usePopper } from "react-popper";
 import { useDispatch } from "react-redux";
 import { Dispatch, useStore } from "../../store";
-import { Avatar } from "../atoms/Avatar";
 import { MenuButton } from "../atoms/MenuButton";
 import { MenuGroup } from "../atoms/MenuGroup";
 import { Popover } from "../atoms/Popover";
@@ -76,14 +75,7 @@ export const UserMenu = () => {
       >
         <ChevronDownIcon height="1.5rem" width="0.5rem" />
         {user && (
-          <>
-            <Avatar
-              userName={user.displayName ?? user.userName}
-              avatarUrl={user.avatarImage}
-              progress={progress * 100}
-            />
-            <p className={styles.userName}>{user.displayName ?? user.userName}</p>
-          </>
+          <p className={styles.userName}>{user.displayName ?? user.userName}</p>
         )}
       </div>
       <Popover
