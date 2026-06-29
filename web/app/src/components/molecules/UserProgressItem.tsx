@@ -4,7 +4,7 @@ import type { UserProgress } from "../../../../../types/moviematch";
 import styles from "./UserProgressItem.module.css";
 
 export const UserProgressItem = (
-  { user, progress, ...props }: UserProgress & HTMLAttributes<HTMLDivElement>,
+  { user, progress: _progress, ...props }: UserProgress & HTMLAttributes<HTMLDivElement>,
 ) => {
   return (
     <div className={styles.userProgress} {...props}>
