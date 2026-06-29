@@ -149,11 +149,11 @@ export const RoomEntryScreen = () => {
           onChange={(value) => setMode(value as Mode)}
           paddingTop="s5"
         >
-          <SegmentedControlOption value="create" testHandle="mode-create">
-            <Tr name="CREATE_ROOM" />
-          </SegmentedControlOption>
           <SegmentedControlOption value="join" testHandle="mode-join">
             <Tr name="JOIN_ROOM" />
+          </SegmentedControlOption>
+          <SegmentedControlOption value="create" testHandle="mode-create">
+            <Tr name="CREATE_ROOM" />
           </SegmentedControlOption>
         </SegmentedControls>
 
