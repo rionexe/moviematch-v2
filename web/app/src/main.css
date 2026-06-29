@@ -145,9 +145,10 @@ body {
   --mm-cream: #f3eee2;
   --mm-bg-from: #f3eee2;
   --mm-bg-to: #e4dcc8;
-  --mm-glass-bg: rgba(243, 238, 226, 0.65);
-  --mm-glass-border: rgba(122, 104, 85, 0.18);
-  --mm-glass-rim: rgba(255, 255, 255, 0.9);
+  --mm-black: #1c1814;
+  --mm-glass-bg: rgba(255, 252, 245, 0.84);
+  --mm-glass-border: rgba(122, 104, 85, 0.28);
+  --mm-glass-rim: rgba(255, 255, 255, 0.95);
   --mm-glass-sheen: linear-gradient(rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
   --mm-text-color: #3a3028;
   --mm-line-color: rgba(0, 0, 0, 0.1);
