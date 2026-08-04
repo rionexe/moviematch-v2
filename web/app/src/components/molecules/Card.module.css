@@ -96,6 +96,8 @@
   line-height: 1.1;
   font-weight: bold;
   margin-bottom: var(--s2);
+  /* Keeps the title clear of the IMDb badge in the top-right corner. */
+  padding-right: 3rem;
 }
 
 /* Matched-row likers ("X & Y liked Z"), shown on the flipped side since the front
@@ -130,8 +132,24 @@
   line-height: 0;
 }
 
+/* IMDb badge: top-right corner, clear of the title/description and the
+   Plex badge (which stays bottom-right). */
+.imdbButton {
+  position: absolute;
+  top: var(--s3);
+  right: var(--s3);
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.45rem;
+  display: block;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+  line-height: 0;
+}
+
 @media (hover: hover) {
-  .plexButton:hover {
+  .plexButton:hover,
+  .imdbButton:hover {
     transform: scale(1.08);
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.65);
   }

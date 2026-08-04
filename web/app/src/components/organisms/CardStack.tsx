@@ -15,6 +15,7 @@ import { useStore } from "../../store";
 import styles from "./CardStack.module.css";
 import { HeartIcon } from "../icons/HeartIcon";
 import { CloseIcon } from "../icons/CloseIcon";
+import { UndoIcon } from "../icons/UndoIcon";
 const { abs, sign } = Math;
 
 type Card = Media;
@@ -23,6 +24,7 @@ interface CardStackProps {
   cards: Card[];
   renderCard: (card: Card) => ReactNode;
   onCardDismissed: (card: Card, direction: "left" | "right") => void;
+  onUndo: (card: Card, direction: "left" | "right") => void;
 }
 
 type Spring = {
@@ -81,30 +83,47 @@ export const useFirstChildWidth = (transform?: (n: number) => number) => {
 };
 
 export const CardStack = memo(
-  ({ cards, renderCard, onCardDismissed }: CardStackProps) => {
+  ({ cards, renderCard, onCardDismissed, onUndo }: CardStackProps) => {
     const vw = useViewportWidth((n) => n / 2);
     const [{ connectionStatus }] = useStore(["connectionStatus"]);
     const [elRef, ew] = useFirstChildWidth();
+    // Most recent swipe, kept so a wrong swipe can be undone. Cleared once
+    // undone or once the reference would be stale (see the guard in rateItem).
+    const [lastDismissed, setLastDismissed] = useState<
+      { card: Card; direction: "left" | "right" } | null
+    >(null);
+    // Once the user has rated a card (drag, button, or keyboard — any path
+    // through the "remove" case below), they've got the idea; hide the hint.
+    const [hasRated, setHasRated] = useState(false);
 
-    const [{ items }, dispatch] = useReducer(
+    const [{ items, lastAddedId }, dispatch] = useReducer(
       function reducer(
-        { items, index }: { items: StackItem<Card>[]; index: number },
+        { items, index, lastAddedId }: {
+          items: StackItem<Card>[];
+          index: number;
+          lastAddedId: string | null;
+        },
         action:
           | { type: "add" }
           | {
             type: "remove";
             payload: { id: string; direction: "left" | "right" };
           }
-          | { type: "finalizeRemove"; payload: { id: string } },
+          | { type: "finalizeRemove"; payload: { id: string } }
+          | {
+            type: "undo";
+            payload: { card: Card; replenishedId?: string };
+          },
       ) {
         let newIndex = index;
         let newItems = items;
+        let newLastAddedId: string | null = lastAddedId;
 
         switch (action.type) {
           case "add": {
             newIndex = index + 1;
             if (newIndex > cards.length) {
-              return { items, index };
+              return { items, index, lastAddedId: null };
             }
             const [newCard] = cards.slice(index, newIndex);
             // New card enters at the back (index 0); it fades in from opacity 0 and
@@ -125,6 +144,10 @@ export const CardStack = memo(
               },
               ...items.map((item) => ({ ...item, index: item.index + 1 })),
             ];
+            // Tracked so "undo" can drop this same card if the swipe that
+            // triggered it gets undone — otherwise the deck permanently
+            // grows by one card per undo.
+            newLastAddedId = newCard.id;
             break;
           }
           case "remove": {
@@ -149,6 +172,11 @@ export const CardStack = memo(
                     payload: { id: action.payload.id },
                   });
                   onCardDismissed(item.item, action.payload.direction);
+                  setLastDismissed({
+                    card: item.item,
+                    direction: action.payload.direction,
+                  });
+                  setHasRated(true);
                 });
 
               newItems = items.map((item, i) =>
@@ -166,6 +194,52 @@ export const CardStack = memo(
             }
             break;
           }
+          case "undo": {
+            // Undo the pairing "add" too: that dispatch pulled a fresh card
+            // into the buffer the moment the swipe happened, so leaving it in
+            // place would grow the deck by one every time. Drop it (there
+            // won't be one if the deck was already exhausted when the user
+            // swiped) and rewind the `cards` cursor so it's offered again
+            // in its original order instead of being skipped forever.
+            let base = items;
+            if (action.payload.replenishedId) {
+              // The buffer card being dropped was always inserted at index 0
+              // (see "add"), so every remaining item's index needs to shift
+              // down by 1 to close the gap it leaves — otherwise that hole
+              // persists (and gets pushed deeper into the stack by each
+              // subsequent "add"), skipping a depth value and showing up as
+              // a gap in the fan a few cards back.
+              base = items
+                .filter((it) => it.id !== action.payload.replenishedId)
+                .map((it) => ({ ...it, index: it.index - 1 }));
+              newIndex = index - 1;
+            }
+
+            // Re-insert the dismissed card as the new front card (highest
+            // index = least depth).
+            const maxLiveIndex = base.reduce(
+              (m, it) => (!it.removed && it.index > m ? it.index : m),
+              -1,
+            );
+            const controller = new Controller<Spring>({
+              x: 0,
+              y: 0,
+              opacity: 0,
+              brightness: 1,
+            });
+            newItems = [
+              ...base,
+              {
+                id: action.payload.card.id,
+                item: action.payload.card,
+                index: maxLiveIndex + 1,
+                controller,
+                removed: false,
+              },
+            ];
+            newLastAddedId = null;
+            break;
+          }
         }
 
         // Recompute resting positions for live cards only. A card being swiped
@@ -177,7 +251,7 @@ export const CardStack = memo(
           item.controller.start(restSpring(maxIndex - item.index));
         }
 
-        return { index: newIndex, items: newItems };
+        return { index: newIndex, items: newItems, lastAddedId: newLastAddedId };
       },
       {
         items: cards.slice(0, INITIAL_COUNT).map((card, i) => ({
@@ -190,6 +264,7 @@ export const CardStack = memo(
           removed: false,
         })),
         index: INITIAL_COUNT,
+        lastAddedId: null,
       },
     );
 
@@ -211,6 +286,21 @@ export const CardStack = memo(
       }
     };
 
+    const undo = () => {
+      if (!lastDismissed || connectionStatus !== "connected") {
+        return;
+      }
+      dispatch({
+        type: "undo",
+        payload: {
+          card: lastDismissed.card,
+          replenishedId: lastAddedId ?? undefined,
+        },
+      });
+      onUndo(lastDismissed.card, lastDismissed.direction);
+      setLastDismissed(null);
+    };
+
     useEffect(() => {
       const handler = (e: KeyboardEvent) => {
         if (connectionStatus !== "connected") {
@@ -219,11 +309,13 @@ export const CardStack = memo(
 
         if (e.code === "ArrowLeft" || e.code === "ArrowRight") {
           rateItem(e.code === "ArrowLeft" ? "left" : "right");
+        } else if (e.code === "Backspace") {
+          undo();
         }
       };
       window.addEventListener("keydown", handler);
       return () => window.removeEventListener("keydown", handler);
-    }, [items]);
+    }, [items, lastDismissed]);
 
     const bind = useGesture(
       {
@@ -283,21 +375,18 @@ export const CardStack = memo(
               <Tr name="RATE_SECTION_EXHAUSTED_CARDS" />
             </p>
           )}
-          {!isEmpty && (
-            <>
-              <button
-                className={styles.dislikeButton}
-                onClick={() => rateItem("left")}
-              >
-                <CloseIcon />
-              </button>
-              <button
-                className={styles.likeButton}
-                onClick={() => rateItem("right")}
-              >
-                <HeartIcon />
-              </button>
-            </>
+          {!isEmpty && !hasRated && (
+            // Explains the drag gesture up front; hidden as soon as the user
+            // rates their first card (drag, button, or keyboard), so it never
+            // gets in the way once they've got it.
+            <p className={styles.swipeHint}>
+              <span>
+                <Tr name="RATE_SECTION_SWIPE_HINT_LEFT" />
+              </span>
+              <span>
+                <Tr name="RATE_SECTION_SWIPE_HINT_RIGHT" />
+              </span>
+            </p>
           )}
           {items.map((item) => {
             const { x, y, opacity, brightness } = item.controller.springs;
@@ -326,6 +415,41 @@ export const CardStack = memo(
             );
           })}
         </div>
+        {cards.length > 0 && (
+          // Below the poster, not overlapping it — the buttons used to float
+          // over the card itself and got lost against busy artwork,
+          // especially on phones where there's no room to push them out to
+          // the sides. A permanent bar, not a toggleable one: dislike/like
+          // grey out (rather than disappear) once the deck is exhausted, and
+          // undo reserves its spot even with nothing to undo yet, so nothing
+          // in the bar ever shifts around.
+          <div className={styles.actionBar}>
+            <button
+              className={styles.dislikeButton}
+              disabled={isEmpty}
+              onClick={() => rateItem("left")}
+            >
+              <CloseIcon />
+            </button>
+            <button
+              className={styles.undoButton}
+              aria-label="Undo last swipe"
+              aria-hidden={!lastDismissed}
+              disabled={!lastDismissed}
+              style={{ visibility: lastDismissed ? "visible" : "hidden" }}
+              onClick={undo}
+            >
+              <UndoIcon />
+            </button>
+            <button
+              className={styles.likeButton}
+              disabled={isEmpty}
+              onClick={() => rateItem("right")}
+            >
+              <HeartIcon />
+            </button>
+          </div>
+        )}
       </>
     );
   },

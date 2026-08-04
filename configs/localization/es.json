@@ -9,6 +9,8 @@
   "LOGOUT": "Salir",
   "RATE_SECTION_LOADING": "Cargando películas...",
   "RATE_SECTION_EXHAUSTED_CARDS": "¡Eso es todo! ✌️",
+  "RATE_SECTION_SWIPE_HINT_LEFT": "← No me gusta",
+  "RATE_SECTION_SWIPE_HINT_RIGHT": "Me gusta →",
   "MATCHES_SECTION_TITLE": "Coincidencias",
   "MATCHES_SECTION_NO_MATCHES": "Sin coincidencias... ¿has probado a rebajar un poco a tus impecables gustos cinéfilos?",
   "MATCHES_SECTION_CARD_LIKERS": "${users} quieren ver ${movie}",

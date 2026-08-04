@@ -153,6 +153,17 @@ export const reducer: Reducer<Store, Actions> = (
         },
       };
     }
+    case "unmatch": {
+      return {
+        ...state,
+        room: {
+          ...state.room!,
+          matches: (state.room?.matches ?? []).filter((_) =>
+            _.media.id !== action.payload.mediaId
+          ),
+        },
+      };
+    }
     case "userJoinedRoom": {
       return {
         ...state,

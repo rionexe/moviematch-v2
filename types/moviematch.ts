@@ -38,6 +38,7 @@ export type ServerMessage =
   | { type: "joinRoom"; payload: JoinRoomRequest }
   | { type: "leaveRoom" }
   | { type: "rate"; payload: Rate }
+  | { type: "unrate"; payload: Unrate }
   | { type: "setLocale"; payload: Locale }
   | { type: "setup"; payload: Config }
   | { type: "requestFilters" }
@@ -56,6 +57,7 @@ export type ClientMessage =
   | { type: "leaveRoomSuccess" }
   | { type: "leaveRoomError"; payload: LeaveRoomError }
   | { type: "match"; payload: Match }
+  | { type: "unmatch"; payload: { mediaId: string } }
   | { type: "media"; payload: Media[] }
   | { type: "config"; payload: AppConfig }
   | { type: "translations"; payload: Translations }
@@ -82,6 +84,8 @@ export type TranslationKey =
   | "CREATE_ROOM"
   | "RATE_SECTION_LOADING"
   | "RATE_SECTION_EXHAUSTED_CARDS"
+  | "RATE_SECTION_SWIPE_HINT_LEFT"
+  | "RATE_SECTION_SWIPE_HINT_RIGHT"
   | "MATCHES_SECTION_TITLE"
   | "MATCHES_SECTION_NO_MATCHES"
   | "MATCHES_SECTION_CARD_LIKERS"
@@ -181,6 +185,10 @@ export interface CreateRoomFilterMetadata {
 export interface JoinRoomRequest {
   roomName: string;
   password?: string;
+  // Identifies a previous session in this room, so a dropped connection
+  // (phone locked/backgrounded) can resume the same identity — same ratings,
+  // same progress — instead of being issued a new one and starting over.
+  resumeToken?: string;
 }
 
 export interface JoinRoomError {
@@ -202,6 +210,11 @@ export interface JoinRoomSuccess {
   user: User;
 
   users: Array<{ user: User; progress: number }>;
+
+  // Echoed back so the client can persist it and present it on the next
+  // joinRoom for this room, to resume this same identity after a dropped
+  // connection. See JoinRoomRequest.resumeToken.
+  resumeToken: string;
 }
 
 // Leave
@@ -221,6 +234,8 @@ export interface Media {
   year?: number;
   posterUrl?: string;
   linkUrl: string;
+  // Only present when Plex has matched the item to an IMDb entry.
+  imdbUrl?: string;
   genres: string[];
   duration: number;
   rating: number;
@@ -235,6 +250,10 @@ export interface Match {
 
 export interface Rate {
   rating: "like" | "dislike";
+  mediaId: string;
+}
+
+export interface Unrate {
   mediaId: string;
 }
 

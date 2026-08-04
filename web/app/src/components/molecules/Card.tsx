@@ -5,6 +5,7 @@ import { ContentRatingSymbol } from "../icons/ContentRatingSymbol";
 import { StarIcon } from "../icons/StarIcon";
 import { Pill } from "../atoms/Pill";
 import { PlexIcon } from "../icons/PlexIcon";
+import { IMDbIcon } from "../icons/IMDbIcon";
 
 import styles from "./Card.module.css";
 
@@ -85,6 +86,20 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
             >
               <PlexIcon />
             </a>
+            {/* IMDb badge — top-right corner. Only present when Plex matched
+                this item to an IMDb entry. */}
+            {media.imdbUrl && (
+              <a
+                href={media.imdbUrl}
+                className={styles.imdbButton}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                aria-label="Open on IMDb"
+              >
+                <IMDbIcon />
+              </a>
+            )}
           </div>
         )}
       </div>

@@ -7,6 +7,8 @@
   "CREATE_ROOM": "Create",
   "RATE_SECTION_LOADING": "Lade Filme...",
   "RATE_SECTION_EXHAUSTED_CARDS": "Wir haben das Ende der Fahrt erreicht 🎢. Bitte achten Sie auf Ihren Kopf auf dem Weg nach draußen.",
+  "RATE_SECTION_SWIPE_HINT_LEFT": "← Gefällt mir nicht",
+  "RATE_SECTION_SWIPE_HINT_RIGHT": "Gefällt mir →",
   "MATCHES_SECTION_TITLE": "Übereinstimmungen",
   "MATCHES_SECTION_NO_MATCHES": "Niemand will mit dir einen Film schauen ... noch nicht.",
   "MATCHES_SECTION_CARD_LIKERS": "${users} wollen ${movie} sehen",

@@ -53,6 +53,7 @@ const Harness = () => {
         renderCard={(card) => <Card media={card} key={card.id} />}
         onCardDismissed={(card, dir) =>
           setDismissed((d) => [...d, `${card.id}:${dir}`])}
+        onUndo={() => setDismissed((d) => d.slice(0, -1))}
       />
     </>
   );

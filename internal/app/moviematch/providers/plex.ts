@@ -215,6 +215,9 @@ export const createProvider = (
           }
 
           const mediaKey = libraryItem.key.replace(/\/children\/?$/, "");
+          const imdbId = libraryItem.Guid?.find((guid) =>
+            guid.id.startsWith("imdb://")
+          )?.id.slice("imdb://".length);
           media.push({
             id: libraryItem.guid,
             type: libraryItem.type as LibraryType,
@@ -224,6 +227,9 @@ export const createProvider = (
             year: libraryItem.year,
             posterUrl,
             linkUrl: `/api/link/${id}/${mediaKey}`,
+            imdbUrl: imdbId
+              ? `https://www.imdb.com/title/${imdbId}/`
+              : undefined,
             genres: libraryItem.Genre?.map((_) => _.tag) ?? [],
             duration: Number(libraryItem.duration),
             rating: Number(libraryItem.rating),

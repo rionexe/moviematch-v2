@@ -11,6 +11,7 @@ import {
   LoginError,
   Rate,
   ServerMessage,
+  Unrate,
   User,
 } from "/types/moviematch.ts";
 import {
@@ -110,6 +111,9 @@ export class Client {
                 break;
               case "rate":
                 await this.handleRate(message.payload);
+                break;
+              case "unrate":
+                await this.handleUnrate(message.payload);
                 break;
               case "setLocale":
                 await this.handleSetLocale(message.payload);
@@ -270,10 +274,15 @@ export class Client {
 
     try {
       this.room = await createRoom(createRoomReq, this.ctx);
-      const userName = this.room.uniqueUserName(baseName);
+      // A brand-new room has no prior identity to resume, so this always
+      // mints a fresh one.
+      const { userName, resumeToken } = this.room.claimIdentity(baseName);
       this.roomUserName = userName;
       this.room.users.set(userName, this);
       this.room.displayNames.set(userName, baseName);
+      // The room may have been sitting empty (and counting down to reap) —
+      // it isn't anymore.
+      this.room.cancelReap();
       this.sendMessage({
         type: "createRoomSuccess",
         payload: {
@@ -284,6 +293,7 @@ export class Client {
           ),
           media: await this.room.getMediaForUser(userName),
           users: await this.room.getUsers(),
+          resumeToken,
         },
       });
     } catch (err) {
@@ -319,8 +329,13 @@ export class Client {
 
       this.room = getRoom(joinRoomReq);
       // Make the name unique within the room so two people sharing a name can
-      // both join; the base name is what everyone sees.
-      const userName = this.room.uniqueUserName(baseName);
+      // both join; the base name is what everyone sees. If resumeToken points
+      // at a since-disconnected identity in this room, claimIdentity hands
+      // that same one back instead of minting a new one.
+      const { userName, resumeToken } = this.room.claimIdentity(
+        baseName,
+        joinRoomReq.resumeToken,
+      );
       this.roomUserName = userName;
       this.room.users.set(userName, this);
       this.room.displayNames.set(userName, baseName);
@@ -334,6 +349,7 @@ export class Client {
           ),
           media: await this.room.getMediaForUser(userName),
           users: await this.room.getUsers(),
+          resumeToken,
         },
       });
       const userProgress = this.room.userProgress.get(userName) ?? 0;
@@ -381,6 +397,13 @@ export class Client {
       this.room.users.delete(userName);
       delete this.roomUserName;
 
+      // Whether this was an explicit "leave" or the socket just dropped
+      // (phone locked/backgrounded — see handleClose), if that was the last
+      // connected user, start counting down to reap the room.
+      if (this.room.users.size === 0) {
+        this.room.scheduleReap();
+      }
+
       this.sendMessage({
         type: "leaveRoomSuccess",
       });
@@ -403,6 +426,16 @@ export class Client {
         `Handling rate event: ${userName} ${JSON.stringify(rate)}`,
       );
       this.room?.storeRating(userName, rate, Date.now());
+    }
+  }
+
+  private handleUnrate(unrate: Unrate) {
+    const userName = this.getUsername();
+    if (userName) {
+      log.debug(
+        `Handling unrate event: ${userName} ${JSON.stringify(unrate)}`,
+      );
+      this.room?.removeRating(userName, unrate.mediaId);
     }
   }
 

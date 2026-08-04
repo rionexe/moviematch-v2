@@ -32,6 +32,11 @@ export class NoMediaError extends Error {
   override name = "NoMediaError";
 }
 
+// How long an empty room (last user gone, nobody signed out) is kept alive
+// before it's reaped — rooms otherwise live in memory forever, since there's
+// no other cleanup or persistence.
+const ROOM_REAP_DELAY_MS = 90 * 60 * 1000;
+
 export class Room {
   RouteContext: RouteContext;
   roomName: string;
@@ -41,6 +46,13 @@ export class Room {
   // distinct keys internally while the UI shows the same name. Kept after a user
   // leaves so historical match likers still resolve to a name.
   displayNames = new Map<string, string>();
+  // resumeToken -> unique userName, so a client whose connection drops (phone
+  // locked/backgrounded) can present the token it was issued and reclaim its
+  // original identity instead of being handed a fresh one by uniqueUserName.
+  resumeTokens = new Map<string, string>();
+  // Pending reap timer while this room has zero connected users; see
+  // scheduleReap/cancelReap.
+  private reapTimer: ReturnType<typeof setTimeout> | null = null;
   filters?: Filter[];
   options?: RoomOption[];
   sort: RoomSort;
@@ -108,6 +120,56 @@ export class Room {
     return `${base}${n}`;
   };
 
+  // Resolves a connecting client's identity in the room. If `resumeToken`
+  // still points at a userName that isn't currently connected (their old
+  // socket dropped — phone locked/backgrounded, not an explicit leave), they
+  // resume that exact identity: same ratings, same progress, same
+  // displayName, so they pick up where they left off instead of casting a
+  // second vote under a fresh "name2". Otherwise a new unique name/token pair
+  // is issued and remembered for next time.
+  claimIdentity = (
+    baseName: string,
+    resumeToken?: string,
+  ): { userName: string; resumeToken: string } => {
+    if (resumeToken) {
+      const resumedUserName = this.resumeTokens.get(resumeToken);
+      if (resumedUserName && !this.users.has(resumedUserName)) {
+        return { userName: resumedUserName, resumeToken };
+      }
+    }
+    const userName = this.uniqueUserName(baseName);
+    const newResumeToken = crypto.randomUUID();
+    this.resumeTokens.set(newResumeToken, userName);
+    return { userName, resumeToken: newResumeToken };
+  };
+
+  // Starts the countdown to delete this room once it has no connected users
+  // — e.g. everyone finished picking and just closed the tab without
+  // explicitly leaving. Call whenever `users` might have just hit zero;
+  // safe to call repeatedly (each call restarts the countdown).
+  scheduleReap = () => {
+    this.cancelReap();
+    this.reapTimer = setTimeout(() => {
+      // Someone may have (re)joined between this firing and being scheduled;
+      // only reap if the room is still actually empty.
+      if (this.users.size === 0) {
+        rooms.delete(this.roomName);
+        log.info(
+          `Reaped room ${this.roomName}: empty for ${ROOM_REAP_DELAY_MS / 60_000} minutes.`,
+        );
+      }
+    }, ROOM_REAP_DELAY_MS);
+  };
+
+  // Cancels a pending reap — call whenever a user (re)joins, since the room
+  // is no longer empty.
+  cancelReap = () => {
+    if (this.reapTimer !== null) {
+      clearTimeout(this.reapTimer);
+      this.reapTimer = null;
+    }
+  };
+
   // Map internal unique keys back to base display names (numbers hidden).
   toDisplayNames = (keys: string[]): string[] =>
     keys.map((key) => this.displayNames.get(key) ?? key);
@@ -149,6 +211,43 @@ export class Room {
       this.ratings.set(rating.mediaId, [[userName, rating.rating, matchedAt]]);
     }
 
+    this.userProgress.set(userName, progress);
+
+    this.notifyProgress({ userName }, progress / (await this.media).size);
+  };
+
+  // Undoes storeRating for a single user/media pair (e.g. the user swiped the
+  // wrong direction). If their "like" was the second one that had formed a
+  // match, the match is retracted for everyone via notifyUnmatch.
+  removeRating = async (userName: string, mediaId: string) => {
+    const existingRatings = this.ratings.get(mediaId);
+    if (!existingRatings) {
+      return;
+    }
+
+    const hadMatch =
+      existingRatings.filter(([, rating]) => rating === "like").length > 1;
+
+    const remainingRatings = existingRatings.filter(([_userName]) =>
+      _userName !== userName
+    );
+
+    if (remainingRatings.length === 0) {
+      this.ratings.delete(mediaId);
+    } else {
+      this.ratings.set(mediaId, remainingRatings);
+    }
+
+    const stillMatched =
+      remainingRatings.filter(([, rating]) => rating === "like").length > 1;
+    if (hadMatch && !stillMatched) {
+      this.notifyUnmatch(mediaId);
+    }
+
+    const progress = Math.max(
+      (this.userProgress.get(userName) ?? 0) - 1,
+      0,
+    );
     this.userProgress.set(userName, progress);
 
     this.notifyProgress({ userName }, progress / (await this.media).size);
@@ -224,6 +323,13 @@ export class Room {
     this.broadcastMessage({
       type: "match",
       payload: match,
+    });
+  };
+
+  notifyUnmatch = (mediaId: string) => {
+    this.broadcastMessage({
+      type: "unmatch",
+      payload: { mediaId },
     });
   };
 

@@ -14,6 +14,7 @@ import { Layout } from "../layout/Layout";
 import { Tr } from "../atoms/Tr";
 
 import { GlassSelect, GlassOption } from "../atoms/GlassSelect";
+import { getResumeToken } from "../../api/resumeToken";
 import styles from "./RoomEntry.module.css";
 
 // Every integer 3–18, mirroring V1's fillAgeOptions. Hint column shows the
@@ -38,8 +39,10 @@ const AGE_OPTIONS_DESC = [...AGE_OPTIONS].reverse();
 
 type Mode = "join" | "create";
 
-// Uppercase + digits (36^4 ≈ 1.7M combos); the server still guards duplicates.
-const ROOM_CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+// Uppercase + digits, minus O/0 and I/1 — visually near-identical in most UI
+// fonts, and this code gets read aloud and typed by hand (32^4 ≈ 1M combos;
+// the server still guards duplicates).
+const ROOM_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const generateRoomCode = () =>
   Array.from(
     { length: 4 },
@@ -115,9 +118,13 @@ export const RoomEntryScreen = () => {
     }
 
     if (mode === "join") {
+      const trimmedRoomName = roomName.trim().toUpperCase();
       dispatch({
         type: "joinRoom",
-        payload: { roomName: roomName.trim().toUpperCase() },
+        payload: {
+          roomName: trimmedRoomName,
+          resumeToken: getResumeToken(trimmedRoomName),
+        },
       });
       return;
     }

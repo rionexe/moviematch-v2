@@ -9,6 +9,8 @@
   "LOGOUT": "Déconnexion",
   "RATE_SECTION_LOADING": "Chargement des médias ...",
   "RATE_SECTION_EXHAUSTED_CARDS": "C'est tout pour aujourd'hui les amis ✌️",
+  "RATE_SECTION_SWIPE_HINT_LEFT": "← Je n'aime pas",
+  "RATE_SECTION_SWIPE_HINT_RIGHT": "J'aime →",
   "MATCHES_SECTION_TITLE": "Correspondances",
   "MATCHES_SECTION_NO_MATCHES": "Pas de correspondances... Il semblerait que personne n'aime les mêmes choses que vous ! Pas encore ...",
   "MATCHES_SECTION_CARD_LIKERS": "${users} veut regarder ${movie}",

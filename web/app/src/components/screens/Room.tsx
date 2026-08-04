@@ -28,6 +28,7 @@ export const RoomScreen = () => {
 
   return (
     <Layout hideLogo className={styles.screen}>
+      <RoomInfoBar />
       <CardStack
         cards={media}
         onCardDismissed={(card, rating) => {
@@ -40,10 +41,22 @@ export const RoomScreen = () => {
           });
           setRatedCount((n) => n + 1);
         }}
+        onUndo={(card) => {
+          dispatch({
+            type: "unrate",
+            payload: { mediaId: card.id },
+          });
+          setRatedCount((n) => Math.max(0, n - 1));
+        }}
         renderCard={(card) => <Card media={card} key={card.id} />}
       />
 
-      <RoomInfoBar />
+      <p className={styles.matchCount}>
+        <span className={styles.matchCountBadge}>
+          {(room.matches ?? []).length}
+        </span>
+        <Tr name="MATCHES_SECTION_TITLE" />
+      </p>
       <SegmentedControls
         name="sortMatches"
         value={matchOrder}

@@ -8,6 +8,7 @@ import type {
   Login,
   Rate,
   ServerMessage,
+  Unrate,
 } from "../../../../types/moviematch";
 
 const API_URL = (() => {
@@ -166,6 +167,13 @@ export class MovieMatchClient extends EventTarget {
     this.sendMessage({
       type: "rate",
       payload: rateRequest,
+    });
+  };
+
+  unrate = async (unrateRequest: Unrate) => {
+    this.sendMessage({
+      type: "unrate",
+      payload: unrateRequest,
     });
   };
 

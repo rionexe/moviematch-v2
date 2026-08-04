@@ -9,6 +9,8 @@
   "LOGOUT": "Wyloguj się",
   "RATE_SECTION_LOADING": "Ładuję filmy...",
   "RATE_SECTION_EXHAUSTED_CARDS": "To wszystko ✌️",
+  "RATE_SECTION_SWIPE_HINT_LEFT": "← Nie podoba mi się",
+  "RATE_SECTION_SWIPE_HINT_RIGHT": "Podoba mi się →",
   "MATCHES_SECTION_TITLE": "Dopasowania",
   "MATCHES_SECTION_NO_MATCHES": "Na razie brak dopasowań... czy próbowałeś już trochę obniżyć swoje wyśrubowane wymagania?",
   "MATCHES_SECTION_CARD_LIKERS": "${users} chcą obejrzeć ${movie}",

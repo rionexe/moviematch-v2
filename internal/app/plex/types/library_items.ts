@@ -88,6 +88,9 @@ export interface LibraryItem {
   ratingKey: string;
   key: string;
   guid: string;
+  // External-provider ids (imdb://, tmdb://, tvdb://) — only present when the
+  // request includes `includeGuids=1`. See PlexApi.getLibraryItems.
+  Guid?: { id: string }[];
   studio?: string;
   type: ViewGroup;
   title: string;

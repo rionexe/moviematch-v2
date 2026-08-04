@@ -209,7 +209,9 @@ export class PlexApi {
     return this.fetch<LibraryItems>(
       `/library/sections/${key}/all`,
       {
-        searchParams: filters,
+        // includeGuids surfaces external ids (imdb://, tmdb://, tvdb://) on
+        // each item's `Guid` array — needed for the IMDb link on the card.
+        searchParams: { includeGuids: "1", ...filters },
       },
     );
   }

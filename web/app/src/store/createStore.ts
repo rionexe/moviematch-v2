@@ -11,6 +11,7 @@ import type {
 } from "../../../../types/moviematch";
 import { reducer } from "./reducer";
 import * as plex from "../api/plex_tv";
+import { setResumeToken } from "../api/resumeToken";
 import type { Actions, Dispatch, Store } from "./types";
 
 const getExistingLogin = async () => {
@@ -72,6 +73,7 @@ export const createStore = () => {
           const newUrl = new URL(location.href);
           newUrl.searchParams.set("roomName", roomName);
           history.replaceState(null, document.title, newUrl.href);
+          setResumeToken(roomName, action.payload.resumeToken);
         }
       }
 
