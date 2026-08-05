@@ -124,12 +124,33 @@ export const createProvider = (
         {} as Filters["filterTypes"],
       );
 
+      // Library isn't a real Plex section-level filter, so it's never present
+      // in `meta`. It's synthesized here and handled in-process in getMedia,
+      // re-using the "tag" operators (is/is not) since it's a discrete list
+      // of values just like genre.
+      const libraryTypes = [...new Set((await getLibraries()).map((_) => _.type))];
+      if (libraryTypes.length) {
+        filters.set("library", {
+          title: "Library",
+          key: "library",
+          type: "tag",
+          libraryTypes,
+        });
+      }
+
       return {
         filters: [...filters.values()],
         filterTypes,
       };
     },
     getFilterValues: async (key: string) => {
+      if (key === "library") {
+        return (await getLibraries()).map((library) => ({
+          value: library.key,
+          title: library.title,
+        }));
+      }
+
       const filterValues = await api.getFilterValues(key);
 
       if (filterValues.size) {
@@ -183,7 +204,17 @@ export const createProvider = (
         filters,
       );
 
-      const libraries: Library[] = await getLibraries();
+      let libraries: Library[] = await getLibraries();
+
+      const libraryFilter = filters?.find((_) => _.key === "library");
+      if (libraryFilter) {
+        const isExclude = libraryFilter.operator.startsWith("!");
+        libraries = libraries.filter((library) =>
+          isExclude
+            ? !libraryFilter.value.includes(library.key)
+            : libraryFilter.value.includes(library.key)
+        );
+      }
 
       const results = await Promise.all(
         libraries.map((library) =>
