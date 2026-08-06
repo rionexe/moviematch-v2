@@ -4,6 +4,7 @@
   padding: 0;
   margin: 0;
   display: grid;
+  align-items: start;
   gap: 0.5rem;
 }
 
