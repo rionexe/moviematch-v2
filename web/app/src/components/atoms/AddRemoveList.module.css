@@ -9,6 +9,7 @@
 .listItem {
   display: grid;
   grid-auto-flow: column;
+  align-items: start;
   width: 100%;
   gap: 0.5rem;
   grid-template-columns: 1fr 7rem;
@@ -32,8 +33,7 @@
 .removeButton,
 .addButton {
   width: 3rem;
-  min-height: 3rem;
-  height: 100%;
+  height: 3rem;
   border: 2px solid var(--mm-black);
   border-radius: 5px;
   padding: 0;

@@ -93,6 +93,21 @@ export const createProvider = (
         libraryTypes: LibraryType[];
       }>();
 
+      // Library isn't a real Plex section-level filter, so it's never present
+      // in `meta`. It's synthesized here and handled in-process in getMedia,
+      // re-using the "tag" operators (is/is not) since it's a discrete list
+      // of values just like genre. Inserted first so it sorts to the top of
+      // the filter list, since Map iteration order follows insertion order.
+      const libraryTypes = [...new Set((await getLibraries()).map((_) => _.type))];
+      if (libraryTypes.length) {
+        filters.set("library", {
+          title: "Library",
+          key: "library",
+          type: "tag",
+          libraryTypes,
+        });
+      }
+
       for (const type of meta.Type) {
         if (availableTypes.includes(type.type as LibraryType) && type.Filter) {
           for (const filter of type.Filter) {
@@ -123,20 +138,6 @@ export const createProvider = (
         }),
         {} as Filters["filterTypes"],
       );
-
-      // Library isn't a real Plex section-level filter, so it's never present
-      // in `meta`. It's synthesized here and handled in-process in getMedia,
-      // re-using the "tag" operators (is/is not) since it's a discrete list
-      // of values just like genre.
-      const libraryTypes = [...new Set((await getLibraries()).map((_) => _.type))];
-      if (libraryTypes.length) {
-        filters.set("library", {
-          title: "Library",
-          key: "library",
-          type: "tag",
-          libraryTypes,
-        });
-      }
 
       return {
         filters: [...filters.values()],
