@@ -55,28 +55,30 @@ export const FilterField = ({
       className={styles.filterField}
       data-test-handle={testHandle ?? `${name}-filter-field`}
     >
-      <Select
-        name={"key" + "-" + name}
-        value={key}
-        options={filters.filters.reduce(
-          (acc, filter) => ({ ...acc, [filter.key]: filter.title }),
-          {},
-        )}
-        onChange={(e) => {
-          const newFilter = filters.filters.find(
-            (_) => _.key === e.target.value,
-          );
-          if (newFilter) {
-            setKey(e.target.value);
-            setOperator("=");
-            setValue(
-              newFilter.type === "boolean"
-                ? [{ title: "boolean", value: "1" }]
-                : [],
+      <div className={filter ? undefined : styles.keyOnly}>
+        <Select
+          name={"key" + "-" + name}
+          value={key}
+          options={filters.filters.reduce(
+            (acc, filter) => ({ ...acc, [filter.key]: filter.title }),
+            {},
+          )}
+          onChange={(e) => {
+            const newFilter = filters.filters.find(
+              (_) => _.key === e.target.value,
             );
-          }
-        }}
-      />
+            if (newFilter) {
+              setKey(e.target.value);
+              setOperator("=");
+              setValue(
+                newFilter.type === "boolean"
+                  ? [{ title: "boolean", value: "1" }]
+                  : [],
+              );
+            }
+          }}
+        />
+      </div>
       {filter && (
         <>
           <Select

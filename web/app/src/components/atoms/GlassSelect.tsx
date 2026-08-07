@@ -91,7 +91,7 @@ export const GlassSelect = ({
           <li
             role="option"
             aria-selected={value === ""}
-            className={`${styles.option} ${value === "" ? styles.optionSelected : ""}`}
+            className={styles.option}
             onMouseDown={(e) => { e.preventDefault(); onChange(""); setOpen(false); }}
           >
             <span className={styles.optionLabel}>{placeholder}</span>

@@ -13,3 +13,7 @@
     grid-template: 1fr / 1fr 1fr 2fr;
   }
 }
+
+.keyOnly {
+  grid-column: 1 / -1;
+}

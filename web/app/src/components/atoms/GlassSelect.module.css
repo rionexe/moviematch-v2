@@ -71,7 +71,6 @@
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
-  right: 0;
   z-index: 50;
   list-style: none;
   padding: var(--s1) 0;
@@ -84,6 +83,13 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   max-height: 16rem;
   overflow-y: auto;
+  /* Never narrower than the trigger, but free to grow for long option
+     labels — narrow triggers (e.g. the key column of an already-set
+     filter row) would otherwise force labels like "Content Rating" to
+     wrap illegibly. */
+  min-width: 100%;
+  width: max-content;
+  max-width: min(20rem, calc(100vw - 2rem));
 }
 
 .option {
