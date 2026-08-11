@@ -1,13 +1,15 @@
-# MovieMatch
+# MovieMatch (Willow & Wit edition)
 
-**This branch is not yet stable, please see the
-[v1 branch](https://github.com/LukeChannings/moviematch/tree/v1) for the current
-stable codebase**
+This is [rionexe/moviematch-v2](https://github.com/rionexe/moviematch-v2), a
+fork of [LukeChannings/moviematch](https://github.com/LukeChannings/moviematch)
+v2, rebranded as **Willow & Wit** with a redesigned glassmorphism UI, a
+light/dark theme selector, and several feature and bugfix additions beyond
+upstream. See [RELEASE_NOTES.markdown](./RELEASE_NOTES.markdown) and the
+[git history](https://github.com/rionexe/moviematch-v2/commits/main) for the
+full changelog; current version is in [VERSION](./VERSION).
 
-[![Tests](https://github.com/LukeChannings/moviematch/workflows/Tests/badge.svg?branch=main)](https://github.com/LukeChannings/moviematch/actions/workflows/tests.yaml)
-[![Docker Pulls](https://img.shields.io/docker/pulls/lukechannings/moviematch?label=Docker+Hub)](https://hub.docker.com/repository/docker/lukechannings/moviematch)
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/lukechannings/moviematch?label=Latest+release)](https://github.com/LukeChannings/moviematch/releases)
-[![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/lukechannings/moviematch?color=%23E74B4C&include_prereleases&label=Latest%20pre-release)](https://github.com/LukeChannings/moviematch/releases)
+[![Tests](https://github.com/rionexe/moviematch-v2/workflows/Tests/badge.svg?branch=main)](https://github.com/rionexe/moviematch-v2/actions/workflows/tests.yaml)
+[![Docker Pulls](https://img.shields.io/docker/pulls/rionexe/moviematch-v2?label=Docker+Hub)](https://hub.docker.com/r/rionexe/moviematch-v2)
 
 <div style="text-align: center">
   <a href="screenshots/Splash.jpeg"><img src="screenshots/Splash.jpeg" alt="Splash Screen" width="25%"></a>
@@ -31,18 +33,25 @@ If two (or more) people swipe right on the same movie, it'll show up in
 everyone's matches. The movies that the most people swiped right on will show up
 first.
 
+## What's different from upstream
+
+- **Willow & Wit rebrand and theme selector** — Forest/Ocean glass themes plus
+  Parchment (light) and Willow Night (dark), switchable in the UI.
+- **Library room filter** — filter rooms by Plex library/folder in addition to
+  the existing tag/genre/etc. filters, since Plex doesn't expose that natively.
+- **Swipe undo** and session-resume reliability improvements.
+- **IMDb badge** on cards, Plex-branded "open in Plex" link.
+- Numerous glassmorphism UI polish passes (card stack, matches carousel,
+  filter row layout, dropdown positioning, scrollbars, etc).
+
 ## Getting started
 
-`docker run -it -e PLEX_URL=<Plex URL> -e PLEX_TOKEN=<Your Token> -p 8000:8000 --pull always lukechannings/moviematch:latest`
+`docker run -it -e PLEX_URL=<Plex URL> -e PLEX_TOKEN=<Your Token> -p 8000:8000 --pull always rionexe/moviematch-v2:latest`
 
 **Note**: There is also documentation for **docker-compose** over
 [here](./docs/docker-compose.markdown) 👈
 
 ## Configuration
-
-⚠️ If you're using MovieMatch v1 please refer to
-[**these options**](https://github.com/LukeChannings/moviematch/tree/v1#configuration).
-⚠️
 
 The following variables are supported via a `.env` file or environment
 variables.
@@ -59,7 +68,7 @@ variables.
 | ROOT_PATH            | The root path to use when loading resources. For example, if MovieMatch is on a sub-path, the `ROOT_PATH` should be set to that sub-path (_without a trailing slash_) | No       | ''                                                                                                                   |
 | LIBRARY_TITLE_FILTER | A list of libraries to be included in the cards, comma-separated. e.g. `Films`, or `Films,Television`, or `Films,Workout Videos`                                      | No       | null                                                                                                                 |
 | LIBRARY_TYPE_FILTER  | Only libraries of these types will be used                                                                                                                            | No       | `movie`, (can be `movie`, `artist`, `photo`, or `show`). Multiple options must be comma-separated, e.g. `movie,show` |
-| LINK_TYPE            | The method to use for opening match links                                                                                                                             | No       | `app` (`app` or `http`)                                                                                              |
+| MOVIE_LINK_TYPE      | The method to use for opening match links                                                                                                                             | No       | `app` (`app` or `http`)                                                                                              |
 | LOG_LEVEL            | How much the server should log                                                                                                                                        | No       | `INFO` (supported options are `DEBUG`, `INFO`, `WARNING`, `ERROR`, and `CRITICAL`)                                   |
 
 ## FAQ
